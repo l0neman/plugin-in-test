@@ -25,10 +25,10 @@ public final class Core {
       Log.d(TAG, "ActivityManager: " + method.getName());
       return method.invoke(mActivityManager, args);
     }
-  }
-
-  private static void hookActivityManager() {
+  }  private static void hookActivityManager() {
     try {
+
+
       Object gDefault = Reflect.with("android.app.ActivityManagerNative").injector()
           .field("gDefault")
           .get();
