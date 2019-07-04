@@ -9,10 +9,11 @@ public class PITApp extends Application {
 
   @Override protected void attachBaseContext(Context base) {
     super.attachBaseContext(base);
-    Core.test(this);
+    Core.appAttachBaseContext(this);
   }
 
   @Override public void onCreate() {
     super.onCreate();
+    Core.appOnCreate(this);
   }
 }
