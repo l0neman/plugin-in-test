@@ -14,6 +14,5 @@ public class PITApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
-    Core.appOnCreate(this);
   }
 }
