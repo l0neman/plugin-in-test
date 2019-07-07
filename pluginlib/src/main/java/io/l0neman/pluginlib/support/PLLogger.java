@@ -5,7 +5,7 @@ import android.util.Log;
 /**
  * Created by l0neman on 2019/07/03.
  */
-public class PLLooger {
+public class PLLogger {
 
   private static final String MAIN_TAG = "PL";
 
@@ -27,7 +27,7 @@ public class PLLooger {
 
   private static String getLog(String log) {
     String stackInfo = STACK_PRINT ? stackInfo() : "";
-    return log + "[" + getThreadName() + ']' + stackInfo;
+    return log + " [" + getThreadName() + ']' + stackInfo;
   }
 
   private static String getTag(String tag) {
@@ -77,7 +77,7 @@ public class PLLooger {
   private static int getStackDepth(StackTraceElement[] elements) {
     for (int i = STACK_DEPTH; i < elements.length; i++) {
       final StackTraceElement element = elements[i];
-      if (!element.getClassName().split("\\$")[0].equals(PLLooger.class.getName())) {
+      if (!element.getClassName().split("\\$")[0].equals(PLLogger.class.getName())) {
         return i;
       }
     }
@@ -120,7 +120,7 @@ public class PLLooger {
       return;
     }
 
-    synchronized (PLLooger.class) {
+    synchronized (PLLogger.class) {
       int i = 0;
       int lI = 0;
       int length = log.length();

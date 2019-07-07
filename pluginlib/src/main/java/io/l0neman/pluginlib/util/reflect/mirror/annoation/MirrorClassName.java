@@ -1,4 +1,4 @@
-package io.l0neman.pluginlib.util.reflect.annoation;
+package io.l0neman.pluginlib.util.reflect.mirror.annoation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,2 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.l0neman.pluginlib" />
+    package="io.l0neman.pluginlib">
+
+    <application>
+        <activity android:name=".placeholder.ActivityPlaceholders$Activity0" />
+    </application>
+</manifest>

@@ -1,132 +1,79 @@
 package io.l0neman.pluginlib;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.io.File;
+import java.util.List;
 
-import io.l0neman.pluginlib.provider.android.app.ActivityManagerNative;
-import io.l0neman.pluginlib.provider.android.app.ActivityThread;
-import io.l0neman.pluginlib.support.PLLooger;
+import io.l0neman.pluginlib.mirror.android.content.pm.PackageParser;
+import io.l0neman.pluginlib.support.PLLogger;
+import io.l0neman.pluginlib.util.ClassLoaderUtils;
 import io.l0neman.pluginlib.util.Reflect;
-import io.l0neman.pluginlib.util.reflect.ReflectClass;
 
 public final class Core {
 
-  private static final String TAG = "PLLogger";
+  public static final String TAG = Core.class.getSimpleName();
 
-  // hook Android L.
-  private static class ActivityManagerProxy implements InvocationHandler {
-
-    private final Object mActivityManager;
-
-    ActivityManagerProxy(Object mActivityManager) {
-      this.mActivityManager = mActivityManager;
-    }
-
-    @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-      PLLooger.d(TAG, "ActivityManager: " + method.getName());
-      return method.invoke(mActivityManager, args);
-    }
+  public static void initEnv(Context context) {
+    TestHooker.hook();
   }
 
-  private static void hookActivityManager() {
+  public static void loadAPK(Context context, String apkPath) {
+    PLLogger.d(TAG, "load: " + apkPath);
+
     try {
-      /*
-      Object gDefault = Reflect.with("android.app.ActivityManagerNative").injector()
-          .field("gDefault")
-          .get();
-
-      Object mInstance = Reflect.with("android.util.Singleton").injector()
-          .targetObject(gDefault)
-          .field("mInstance")
-          .get();
-
-      Object newAM = Proxy.newProxyInstance(
-          Thread.currentThread().getContextClassLoader(),
-          new Class<?>[]{Reflect.with("android.app.IActivityManager").getProviderClass()},
-          new ActivityManagerProxy(mInstance)
-      );
-
-      Reflect.with("android.util.Singleton").injector()
-          .targetObject(gDefault)
-          .field("mInstance")
-          .set(newAM);
-      // */
-
-      ActivityManagerNative.mirrorStaticMembers(ActivityManagerNative.class);
-      Object mInstance = ActivityManagerNative.gDefault.mInstance.getValue();
-
-      Object newAM = Proxy.newProxyInstance(
-          Thread.currentThread().getContextClassLoader(),
-          new Class<?>[]{Reflect.with("android.app.IActivityManager").getProviderClass()},
-          new ActivityManagerProxy(mInstance)
-      );
-
-      ActivityManagerNative.gDefault.mInstance.setValue(newAM);
-
+      ClassLoaderUtils.insertCode(context, context.getClassLoader(), apkPath);
+      PLLogger.d(TAG, "insert code.");
+      launchTargetActivity(context, apkPath);
     } catch (Exception e) {
-      e.printStackTrace();
+      PLLogger.w(TAG, "insert code: " + e);
     }
   }
 
-  private static final class HCallbackProxy implements Handler.Callback {
+  private static String findMainActivity(String apkPath) throws Exception {
+    try {
+      Object packageParserObject = Reflect.with("android.content.pm.PackageParser").builder().build();
+      final PackageParser packageParser = PackageParser.mirror(packageParserObject, PackageParser.class);
 
-    private final Handler mH;
+      // find main activity class.
+//      final Object packageObject = packageParser.parsePackage(new File(apkPath), 0);
+      final Object packageObject = packageParser.parsePackage.invoke(new File(apkPath), 0);
 
-    public HCallbackProxy(Handler mH) {
-      this.mH = mH;
-    }
+      List activities = Reflect.with(packageObject).injector().field("activities").get();
 
-    @Override public boolean handleMessage(Message msg) {
+      for (Object activity : activities) {
+        List<IntentFilter> intentFilters = Reflect.with(activity).injector().field("intents").get();
 
-      switch (msg.what) {
-      case ActivityThread.H.LAUNCH_ACTIVITY:
-        PLLooger.d(TAG, "LAUNCH_ACTIVITY: " + msg.obj);
-        break;
+        for (IntentFilter ii : intentFilters) {
+          if (ii.hasAction(Intent.ACTION_MAIN) && ii.hasCategory(Intent.CATEGORY_LAUNCHER)) {
+            ActivityInfo info = Reflect.with(activity).injector().field("info").get();
+            final String className = info.name;
+            PLLogger.d(TAG, "find main activity class: " + className);
+            return className;
+          }
+        }
       }
-
-      mH.handleMessage(msg);
-      return true;
-    }
-  }
-
-  public static void hookActivityThreadH() {
-    try {
-      /*
-      Object sCurrentActivityThread = Reflect.with("android.app.ActivityThread").injector()
-          .field("sCurrentActivityThread")
-          .get();
-
-      Handler mH = Reflect.with("android.app.ActivityThread").injector()
-          .targetObject(sCurrentActivityThread)
-          .field("mH")
-          .get();
-      // */
-
-      ActivityThread.mirrorStaticMembers(ActivityThread.class);
-      Object sCurrentActivityThread = ActivityThread.sCurrentActivityThread.getValue();
-
-      ActivityThread activityThread = ReflectClass.mirror(sCurrentActivityThread,
-          ActivityThread.class);
-
-      Handler mH = activityThread.mH.getValue();
-
-      Reflect.with(Handler.class).injector()
-          .targetObject(mH)
-          .field("mCallback")
-          .set(new HCallbackProxy(mH));
-
+      throw new Exception("not found main activity.");
     } catch (Exception e) {
-      e.printStackTrace();
+      PLLogger.w(TAG, "findMainActivity: ", e);
+      throw new Exception(e);
     }
   }
 
-  public static void appAttachBaseContext(Context context) {
-    hookActivityManager();
-    hookActivityThreadH();
+  private static void launchTargetActivity(Context context, String apkPath) {
+    final String mainActivityName;
+    try {
+      mainActivityName = findMainActivity(apkPath);
+      try {
+        context.startActivity(new Intent(context, Class.forName(mainActivityName)));
+      } catch (Throwable e) {
+        PLLogger.e(TAG, "start activity", e);
+      }
+    } catch (Exception e) {
+      PLLogger.w(TAG, "launchTargetActivity", e);
+    }
   }
 }

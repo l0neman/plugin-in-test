@@ -2,6 +2,7 @@ package io.l0neman.pluginlib.util;
 
 import android.os.Build;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -10,8 +11,8 @@ import java.lang.reflect.Method;
  */
 public class Reflect {
 
-  private Class<?> providerClass;
-  private Object targetObject;
+  private Class<?> mClass;
+  private Object mObject;
   private static ThreadLocal<Reflect> sThreadState =
       new ThreadLocal<Reflect>() {
         @Override protected Reflect initialValue() {
@@ -28,16 +29,22 @@ public class Reflect {
   }
 
   public static Reflect with(Object targetObject) {
+    if (targetObject instanceof Class) {
+      return with((Class<?>) targetObject);
+    }
+
     final Reflect reflectNew = sThreadState.get();
-    reflectNew.providerClass = targetObject.getClass();
-    reflectNew.targetObject = targetObject;
+    // noinspection ConstantConditions [ensure not null].
+    reflectNew.mClass = targetObject.getClass();
+    reflectNew.mObject = targetObject;
     return reflectNew;
   }
 
   public static Reflect with(Class<?> providerClass) {
     final Reflect reflectNew = sThreadState.get();
-    reflectNew.providerClass = providerClass;
-    reflectNew.targetObject = null;
+    // noinspection ConstantConditions [ensure not null].
+    reflectNew.mClass = providerClass;
+    reflectNew.mObject = null;
     return reflectNew;
   }
 
@@ -49,31 +56,44 @@ public class Reflect {
     return new Invoker();
   }
 
-  public Class<?> getProviderClass() {
-    return providerClass;
+  public Builder builder() {
+    return new Builder();
   }
 
-  public abstract class ReflectUtils {
-    public ReflectUtils providerClass(String providerClass) {
+  public Class<?> getClazz() {
+    return mClass;
+  }
+
+  public final class Builder {
+    private Class<?>[] constructorParameterTypes;
+
+    public <T> T build() throws Exception {
       try {
-        return providerClass(Compat.classForName(providerClass));
+        // noinspection unchecked
+        return (T) getClazz().newInstance();
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new Exception("build", e);
       }
     }
 
-    public ReflectUtils providerClass(Class<?> providerClass) {
-      Reflect.this.providerClass = providerClass;
-      return this;
+    public void parameterTypes(Class<?>[] constructorParameterTypes) {
+      this.constructorParameterTypes = constructorParameterTypes;
     }
 
-    public ReflectUtils targetObject(Object targetObject) {
-      Reflect.this.targetObject = targetObject;
-      return this;
+    public <T> T build(Object... params) throws Exception {
+      try {
+        final Constructor<?> constructor =
+            Compat.classFGetConstructor(getClazz(), constructorParameterTypes);
+
+        // noinspection unchecked
+        return (T) constructor.newInstance(params);
+      } catch (Exception e) {
+        throw new Exception("build", e);
+      }
     }
   }
 
-  public final class Injector extends ReflectUtils {
+  public final class Injector {
     private String fieldName;
 
     public Injector field(String name) {
@@ -81,60 +101,39 @@ public class Reflect {
       return this;
     }
 
-    public Injector providerClass(String providerClass) {
-      super.providerClass(providerClass);
-      return this;
-    }
-
-    public Injector providerClass(Class<?> providerClass) {
-      super.providerClass(providerClass);
-      return this;
-    }
-
-    public Injector targetObject(Object targetObject) {
-      super.targetObject(targetObject);
-      return this;
-    }
-
     public void set(Object value) throws Exception {
-      Field field = Compat.need() ?
-          Compat.classGetDeclaredField(providerClass, fieldName) :
-          providerClass.getDeclaredField(fieldName);
+      Field field = getDeclaredFieldFromClassTree(mClass);
       field.setAccessible(true);
 
-      field.set(targetObject, value);
+      field.set(mObject, value);
     }
 
     public <T> T get() throws Exception {
-      Field field = Compat.need() ?
-          Compat.classGetDeclaredField(providerClass, fieldName) :
-          providerClass.getDeclaredField(fieldName);
+      Field field = getDeclaredFieldFromClassTree(mClass);
       field.setAccessible(true);
 
       //noinspection unchecked - throw cast exception.
-      return (T) field.get(targetObject);
+      return (T) field.get(mObject);
+    }
+
+    private Field getDeclaredFieldFromClassTree(Class<?> clazz) throws Exception {
+      try {
+        return Compat.classGetDeclaredField(clazz, fieldName);
+      } catch (NoSuchFieldException e) {
+        Class<?> parent = clazz.getSuperclass();
+        if (parent != Object.class) {
+          return getDeclaredFieldFromClassTree(parent);
+        }
+      }
+
+      throw new Exception("not found field: " + fieldName + " from class: " + clazz);
     }
 
   }
 
-  public final class Invoker extends ReflectUtils {
+  public final class Invoker {
     private String methodName;
     private Class<?>[] paramsTypes;
-
-    public Invoker providerClass(String providerClass) {
-      super.providerClass(providerClass);
-      return this;
-    }
-
-    public Invoker providerClass(Class<?> providerClass) {
-      super.providerClass(providerClass);
-      return this;
-    }
-
-    public Invoker targetObject(Object targetObject) {
-      super.targetObject(targetObject);
-      return this;
-    }
 
     /**
      * Set the method name.
@@ -159,57 +158,69 @@ public class Reflect {
     }
 
     public <T> T invoke(Object... params) throws Exception {
-      Method targetMethod = Compat.need() ?
-          Compat.classGetDeclaredMethod(providerClass, methodName, paramsTypes) :
-          providerClass.getDeclaredMethod(methodName, paramsTypes);
+      Method targetMethod = getDeclaredMethodFromClassTree(mClass);
       targetMethod.setAccessible(true);
 
       //noinspection unchecked - throw cast exception.
-      return (T) targetMethod.invoke(targetObject, params);
+      return (T) targetMethod.invoke(mObject, params);
+    }
+
+    private Method getDeclaredMethodFromClassTree(Class<?> clazz) throws Exception {
+      try {
+        return Compat.classGetDeclaredMethod(clazz, methodName, paramsTypes);
+      } catch (NoSuchMethodException e) {
+        Class<?> parent = clazz.getSuperclass();
+        if (parent != Object.class) {
+          return getDeclaredMethodFromClassTree(parent);
+        }
+      }
+
+      throw new Exception("not found method: " + methodName + " from class: " + clazz);
     }
   }
 
+  // 兼容 android P 禁止调用私有 api（双重反射）。
   private static final class Compat {
     private static Method sClassGetDeclaredField;
     private static Method sClassGetDeclaredMethod;
     private static Method sClassForName;
+    private static Method sClassGetConstructor;
+
+    private static final boolean NEED_COMPAT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P;
 
     static {
       try {
         sClassGetDeclaredField = Class.class.getMethod("getDeclaredField", String.class);
-      } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      }
-
-      try {
         sClassGetDeclaredMethod = Class.class.getMethod("getDeclaredMethod", String.class, Class[].class);
-      } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      }
-
-      try {
         sClassForName = Class.class.getMethod("forName", String.class);
+        sClassGetConstructor = Class.class.getMethod("getConstructor", Class[].class);
+
       } catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
       }
     }
 
-    static boolean need() {
-      return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P;
+    private static <T> Constructor<T> classFGetConstructor(Class<T> clazz,
+                                                           Class<?>[] parameterTypes) throws Exception {
+      // noinspection unchecked
+      return NEED_COMPAT ? (Constructor<T>) sClassGetConstructor.invoke(clazz, (Object[]) parameterTypes) :
+          clazz.getConstructor(parameterTypes);
     }
 
     private static Class<?> classForName(String classNam) throws Exception {
-      return (Class<?>) sClassForName.invoke(null, classNam);
+      return NEED_COMPAT ? (Class<?>) sClassForName.invoke(null, classNam) :
+          Class.forName(classNam);
     }
 
-    // 兼容 android P 禁止调用私有 api，间接使用系统类型调用私有 api。
     private static Field classGetDeclaredField(Class<?> clazz, String fieldName) throws Exception {
-      return (Field) sClassGetDeclaredField.invoke(clazz, fieldName);
+      return NEED_COMPAT ? (Field) sClassGetDeclaredField.invoke(clazz, fieldName) :
+          clazz.getDeclaredField(fieldName);
     }
 
     private static Method classGetDeclaredMethod(Class<?> clazz, String fieldName,
                                                  Class<?>[] parameterTypes) throws Exception {
-      return (Method) sClassGetDeclaredMethod.invoke(clazz, fieldName, parameterTypes);
+      return NEED_COMPAT ? (Method) sClassGetDeclaredMethod.invoke(clazz, fieldName, parameterTypes) :
+          clazz.getDeclaredMethod(fieldName, parameterTypes);
     }
   }
 }
