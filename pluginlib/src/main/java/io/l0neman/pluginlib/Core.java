@@ -1,5 +1,6 @@
 package io.l0neman.pluginlib;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -39,8 +40,7 @@ public final class Core {
       final PackageParser packageParser = PackageParser.mirror(packageParserObject, PackageParser.class);
 
       // find main activity class.
-//      final Object packageObject = packageParser.parsePackage(new File(apkPath), 0);
-      final Object packageObject = packageParser.parsePackage.invoke(new File(apkPath), 0);
+      final Object packageObject = packageParser.parsePackage(new File(apkPath), 0);
 
       List activities = Reflect.with(packageObject).injector().field("activities").get();
 
@@ -67,8 +67,17 @@ public final class Core {
     final String mainActivityName;
     try {
       mainActivityName = findMainActivity(apkPath);
+      Class<?> clazz = Reflect.with(mainActivityName).getClazz();
+      System.out.println(clazz);
+
       try {
-        context.startActivity(new Intent(context, Class.forName(mainActivityName)));
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(
+            context.getPackageManager()
+                .getPackageArchiveInfo(apkPath, 0).packageName,
+            mainActivityName
+        ));
+        context.startActivity(intent);
       } catch (Throwable e) {
         PLLogger.e(TAG, "start activity", e);
       }

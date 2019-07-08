@@ -163,7 +163,6 @@ public abstract class MirrorClass {
    * @param mirrorClass        mirror class.
    * @param <T>                subclass of MirrorClass
    * @return new mirror class instance that completes the mapping.
-   *
    * @throws MirrorException otherwise.
    */
   @SuppressWarnings("unchecked")
@@ -200,8 +199,12 @@ public abstract class MirrorClass {
           }
 
           // for MirrorMethod.
-          field.set(mirrorObject, sMirrorMethodConstructorForClass.newInstance(
-              targetMirrorClass, field.getName(), getTargetMirrorMethodParameterTypes(field)));
+          if (MirrorMethod.class.isAssignableFrom(fieldType)) {
+            field.set(mirrorObject, sMirrorMethodConstructorForClass.newInstance(
+                targetMirrorClass, field.getName(), getTargetMirrorMethodParameterTypes(field)));
+
+            continue; // end static member.
+          }
 
           continue; // end static member.
         }
@@ -230,9 +233,11 @@ public abstract class MirrorClass {
         }
 
         // for MirrorMethod.
-        field.set(mirrorObject, sMirrorMethodConstructorForInstance.newInstance(
-            targetMirrorClass, targetMirrorObject, field.getName(),
-            getTargetMirrorMethodParameterTypes(field)));
+        if (MirrorMethod.class.isAssignableFrom(fieldType)) {
+          field.set(mirrorObject, sMirrorMethodConstructorForInstance.newInstance(
+              targetMirrorClass, targetMirrorObject, field.getName(),
+              getTargetMirrorMethodParameterTypes(field)));
+        }
       }
 
       // init reflect methods.
@@ -250,7 +255,7 @@ public abstract class MirrorClass {
               targetMirrorClass, method.getName(), method.getParameterTypes()
           ));
 
-          continue;
+          continue; // end static member.
         }
 
         reflectMethodMap.put(methodSignature, sMirrorMethodConstructorForInstance.newInstance(

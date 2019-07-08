@@ -1,5 +1,7 @@
 package io.l0neman.pluginlib;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
@@ -9,6 +11,7 @@ import java.lang.reflect.Proxy;
 
 import io.l0neman.pluginlib.mirror.android.app.ActivityManagerNative;
 import io.l0neman.pluginlib.mirror.android.app.ActivityThread;
+import io.l0neman.pluginlib.placeholder.ActivityPlaceholders;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorClass;
@@ -31,6 +34,29 @@ public class TestHooker {
 
     @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       PLLogger.d(TAG, "ActivityManager: " + method.getName());
+
+      if ("startActivity".equals(method.getName())) {
+        Intent raw = null;
+        int i = 0;
+        for (Object arg : args) {
+          if (arg instanceof Intent) {
+            raw = (Intent) arg;
+            break;
+          }
+
+          i++;
+        }
+
+        Intent newIntent = new Intent();
+        newIntent.putExtra("sssssssss", raw);
+        newIntent.setComponent(new ComponentName(
+            "io.l0neman.pluginlib", ActivityPlaceholders.Activity0.class.getName()
+        ));
+
+        args[i] = new Intent();
+        return method.invoke(mActivityManager, args);
+      }
+
       return method.invoke(mActivityManager, args);
     }
   }
@@ -65,9 +91,23 @@ public class TestHooker {
     @Override public boolean handleMessage(Message msg) {
 
       switch (msg.what) {
-      case ActivityThread.H.LAUNCH_ACTIVITY:
-        PLLogger.d(TAG, "LAUNCH_ACTIVITY: " + msg.obj);
-        break;
+        case ActivityThread.H.LAUNCH_ACTIVITY:
+          PLLogger.d(TAG, "LAUNCH_ACTIVITY: " + msg.obj);
+
+          try {
+            Intent intent = Reflect.with(msg.obj).injector()
+                .field("intent")
+                .get();
+
+            Intent raw = intent.getParcelableExtra("rawIntent");
+            if (raw != null) {
+              intent.setComponent(raw.getComponent());
+            }
+          } catch (Exception e) {
+            PLLogger.w(TAG, e);
+          }
+
+          break;
       }
 
       mH.handleMessage(msg);
@@ -77,7 +117,6 @@ public class TestHooker {
 
   private static void hookActivityThreadH() {
     try {
-
       ActivityThread.mirror(ActivityThread.class);
       Object sCurrentActivityThread = ActivityThread.sCurrentActivityThread.getValue();
 
