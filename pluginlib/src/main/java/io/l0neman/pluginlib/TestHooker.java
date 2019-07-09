@@ -48,12 +48,12 @@ public class TestHooker {
         }
 
         Intent newIntent = new Intent();
-        newIntent.putExtra("sssssssss", raw);
+        newIntent.putExtra("rawIntent", raw);
         newIntent.setComponent(new ComponentName(
-            "io.l0neman.pluginlib", ActivityPlaceholders.Activity0.class.getName()
+            "io.l0neman.pluginintest", ActivityPlaceholders.Activity0.class.getName()
         ));
 
-        args[i] = new Intent();
+        args[i] = newIntent;
         return method.invoke(mActivityManager, args);
       }
 
