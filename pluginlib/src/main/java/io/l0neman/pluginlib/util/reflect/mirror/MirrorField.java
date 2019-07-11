@@ -26,7 +26,7 @@ public class MirrorField<T> {
     this.mName = mName;
   }
 
-  public T getValue() throws MirrorException {
+  public T get() throws MirrorException {
     try {
       return Reflect.with(mObject == null ? mClass : mObject).injector()
           .field(mName)
@@ -36,7 +36,7 @@ public class MirrorField<T> {
     }
   }
 
-  public void setValue(Object value) throws MirrorException {
+  public void set(Object value) throws MirrorException {
     try {
       Reflect.with(mObject == null ? mClass : mObject).injector()
           .field(mName)

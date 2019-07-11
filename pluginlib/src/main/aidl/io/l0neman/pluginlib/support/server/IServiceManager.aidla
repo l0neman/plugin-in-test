@@ -1,0 +1,8 @@
+package io.l0neman.pluginlib.support.server;
+
+interface IServiceManager {
+
+    void addService(String name, in IBinder binder);
+
+    IBinder getService(String name);
+}

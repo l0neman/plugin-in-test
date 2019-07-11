@@ -3,5 +3,10 @@
 
     <application>
         <activity android:name=".placeholder.ActivityPlaceholders$Activity0" />
+
+        <provider
+            android:exported="false"
+            android:authorities="io.l0neman.pluginlib.smprovider"
+            android:name=".support.server.ServiceManagerProvider"/>
     </application>
 </manifest>
