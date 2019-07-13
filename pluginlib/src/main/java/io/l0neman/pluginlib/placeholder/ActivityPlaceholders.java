@@ -1,9 +1,10 @@
 package io.l0neman.pluginlib.placeholder;
 
 import android.app.Activity;
+import android.app.Service;
+import android.content.Intent;
 import android.os.Bundle;
-
-import io.l0neman.pluginlib.support.PLLogger;
+import android.os.IBinder;
 
 /**
  * Created by l0neman on 2019/07/07.
@@ -14,7 +15,13 @@ public class ActivityPlaceholders {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
-      PLLogger.w("NEW_NO", "oh no no no.");
+    }
+  }
+
+  public static class Service0 extends Service {
+
+    @Override public IBinder onBind(Intent intent) {
+      return null;
     }
   }
 }

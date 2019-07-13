@@ -12,9 +12,9 @@ import io.l0neman.pluginlib.placeholder.ActivityPlaceholders;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.util.Reflect;
 
-public class ActivityManager {
+public class ActivityManagerNativeHook {
 
-  private static final String TAG = ActivityManager.class.getSimpleName();
+  private static final String TAG = ActivityManagerNativeHook.class.getSimpleName();
 
   // hook Android L.
   private static class ActivityManagerProxy implements InvocationHandler {
@@ -29,17 +29,16 @@ public class ActivityManager {
       PLLogger.d(TAG, "ActivityManager: " + method.getName());
 
       if ("startActivity".equals(method.getName())) {
-        Intent raw = null;
+        // find raw Intent arg.
         int i = 0;
-        for (Object arg : args) {
-          if (arg instanceof Intent) {
-            raw = (Intent) arg;
-            break;
-          }
-
+        while (!(args[i] instanceof Intent)) {
           i++;
         }
 
+        Intent raw = (Intent) args[i];
+
+
+        // build new Intent.
         Intent newIntent = new Intent();
         newIntent.putExtra("rawIntent", raw);
         newIntent.setComponent(new ComponentName(
@@ -47,7 +46,6 @@ public class ActivityManager {
         ));
 
         args[i] = newIntent;
-        return method.invoke(mActivityManager, args);
       }
 
       return method.invoke(mActivityManager, args);

@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 
 import java.io.File;
 import java.util.List;
 
+import io.l0neman.pluginlib.hook.android.app.ActivityManagerNativeHook;
+import io.l0neman.pluginlib.hook.android.app.ActivityThreadHook;
 import io.l0neman.pluginlib.mirror.android.content.pm.PackageParser;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.util.ClassLoaderUtils;
@@ -18,23 +21,34 @@ public final class Core {
 
   public static final String TAG = Core.class.getSimpleName();
 
-  public static void initEnv(Context context) {
-    TestHooker.hook();
+  private static Core sCore = new Core();
+
+  public static Core getInstance() {
+    return sCore;
   }
 
-  public static void loadAPK(Context context, String apkPath) {
+  private String mApkPath;
+
+  public void initEnv(Context context) {
+    ActivityManagerNativeHook.hook();
+    ActivityThreadHook.H.hook();
+  }
+
+  public void preloadAPK(Context context, String apkPath) {
     PLLogger.d(TAG, "load: " + apkPath);
 
     try {
       ClassLoaderUtils.insertCode(context, context.getClassLoader(), apkPath);
       PLLogger.d(TAG, "insert code.");
-      launchTargetActivity(context, apkPath);
+
+      this.mApkPath = apkPath;
+
     } catch (Exception e) {
       PLLogger.w(TAG, "insert code: " + e);
     }
   }
 
-  private static String findMainActivity(String apkPath) throws Exception {
+  private String findMainActivity(String apkPath) throws Exception {
     try {
       Object packageParserObject = Reflect.with("android.content.pm.PackageParser").builder().build();
       final PackageParser packageParser = PackageParser.mirror(packageParserObject, PackageParser.class);
@@ -63,18 +77,23 @@ public final class Core {
     }
   }
 
-  private static void launchTargetActivity(Context context, String apkPath) {
+  public void launchAPK(Context context) {
     final String mainActivityName;
     try {
-      mainActivityName = findMainActivity(apkPath);
+      mainActivityName = findMainActivity(mApkPath);
       Class<?> clazz = Reflect.with(mainActivityName).getClazz();
       System.out.println(clazz);
 
       try {
         Intent intent = new Intent();
+        final PackageInfo pi = context.getPackageManager().getPackageArchiveInfo(mApkPath, 0);
+
+        if (pi == null) {
+          return;
+        }
+
         intent.setComponent(new ComponentName(
-            context.getPackageManager()
-                .getPackageArchiveInfo(apkPath, 0).packageName,
+            pi.packageName,
             mainActivityName
         ));
         context.startActivity(intent);
