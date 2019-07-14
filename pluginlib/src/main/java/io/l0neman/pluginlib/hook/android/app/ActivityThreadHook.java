@@ -1,6 +1,7 @@
 package io.l0neman.pluginlib.hook.android.app;
 
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.Message;
 
@@ -28,25 +29,43 @@ public class ActivityThreadHook {
       @Override public boolean handleMessage(Message msg) {
 
         switch (msg.what) {
-          case ActivityThread.H.LAUNCH_ACTIVITY:
-            PLLogger.d(TAG, "LAUNCH_ACTIVITY: " + msg.obj);
+        case ActivityThread.H.LAUNCH_ACTIVITY:
+          PLLogger.d(TAG, "LAUNCH_ACTIVITY: " + msg.obj);
 
-            try {
-              Intent intent = Reflect.with(msg.obj).injector().field("intent").get();
+          handleLaunchActivity(msg);
+          break;
+        case ActivityThread.H.CREATE_SERVICE:
+          PLLogger.d(TAG, "CREATE_SERVICE: " + msg.obj);
 
-              Intent raw = intent.getParcelableExtra("rawIntent");
-              if (raw != null) {
-                intent.setComponent(raw.getComponent());
-              }
-            } catch (Exception e) {
-              PLLogger.w(TAG, e);
-            }
-
-            break;
+          handleCreateService(msg);
+          break;
         }
 
         mH.handleMessage(msg);
         return true;
+      }
+
+      private void handleLaunchActivity(Message msg) {
+        try {
+          Intent intent = Reflect.with(msg.obj).injector().field("intent").get();
+
+          Intent raw = intent.getParcelableExtra("rawIntent");
+          if (raw != null) {
+            intent.setComponent(raw.getComponent());
+          }
+        } catch (Exception e) {
+          PLLogger.w(TAG, "handleLaunchActivity", e);
+        }
+      }
+
+      private void handleCreateService(Message msg) {
+        try {
+          ServiceInfo si = Reflect.with(msg.obj).injector().field("info").get();
+          si.name = ActivityManagerNativeHook.sHookServiceName;
+
+        } catch (Exception e) {
+          PLLogger.w(TAG, "handleCreateService", e);
+        }
       }
     }
 

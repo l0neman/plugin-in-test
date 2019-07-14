@@ -1,12 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.l0neman.pluginlib">
 
     <application>
+        <service
+            android:name=".test.TestService"
+            android:enabled="true"
+            android:exported="false"></service>
+
         <activity android:name=".placeholder.ActivityPlaceholders$Activity0" />
 
         <provider
-            android:exported="false"
+            android:name=".support.server.ServiceManagerProvider"
             android:authorities="io.l0neman.pluginlib.smprovider"
-            android:name=".support.server.ServiceManagerProvider"/>
+            android:exported="false" />
+
+        <service android:name=".placeholder.ServicePlaceholders$Service0" />
     </application>
+
 </manifest>

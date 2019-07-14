@@ -3,6 +3,7 @@ package io.l0neman.pluginintest;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,6 +13,7 @@ import java.io.InputStream;
 
 import io.l0neman.pluginlib.Core;
 import io.l0neman.pluginlib.support.PLLogger;
+import io.l0neman.pluginlib.test.Test;
 import io.l0neman.pluginlib.util.concurrent.EasyAsync;
 import io.l0neman.pluginlib.util.file.AEasyDir;
 import io.l0neman.pluginlib.util.file.EasyFile;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
+//    Test.test(this);
     prepareAPK();
   }
 
@@ -63,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Core.getInstance().preloadAPK(MainActivity.this, result.getPath());
+        Toast.makeText(MainActivity.this, "preload apk ok", Toast.LENGTH_SHORT).show();
       }
     }).execute();
   }
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     if (event.getActionMasked() == MotionEvent.ACTION_UP) {
 //      ATest.jump(this);
       Core.getInstance().launchAPK(this);
+//      Test.test2(this);
     }
 
     return super.onTouchEvent(event);

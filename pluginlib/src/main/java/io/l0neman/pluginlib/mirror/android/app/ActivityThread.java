@@ -15,5 +15,6 @@ public class ActivityThread extends MirrorClass {
 
   public static class H {
     public static final int LAUNCH_ACTIVITY = 100;
+    public static final int CREATE_SERVICE = 114;
   }
 }
