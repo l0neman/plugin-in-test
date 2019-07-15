@@ -81,7 +81,7 @@ public class MainActivity extends BaseUtilsActivity {
     btn5.setText("stop TargetService");
     click(btn5, new View.OnClickListener() {
       @Override public void onClick(View v) {
-        bindTargetService();
+        stopTargetService();
       }
     });
 

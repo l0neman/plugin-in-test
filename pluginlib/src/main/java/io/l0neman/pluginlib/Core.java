@@ -14,6 +14,7 @@ import io.l0neman.pluginlib.hook.android.app.ActivityManagerNativeHook;
 import io.l0neman.pluginlib.hook.android.app.ActivityThreadHook;
 import io.l0neman.pluginlib.mirror.android.content.pm.PackageParser;
 import io.l0neman.pluginlib.support.PLLogger;
+import io.l0neman.pluginlib.util.AppUtils;
 import io.l0neman.pluginlib.util.ClassLoaderUtils;
 import io.l0neman.pluginlib.util.Reflect;
 
@@ -48,41 +49,14 @@ public final class Core {
     }
   }
 
-  private String findMainActivity(String apkPath) throws Exception {
-    try {
-      Object packageParserObject = Reflect.with("android.content.pm.PackageParser").builder().build();
-      final PackageParser packageParser = PackageParser.mirror(packageParserObject, PackageParser.class);
-
-      // find main activity class.
-      final Object packageObject = packageParser.parsePackage(new File(apkPath), 0);
-
-      List activities = Reflect.with(packageObject).injector().field("activities").get();
-
-      for (Object activity : activities) {
-        List<IntentFilter> intentFilters = Reflect.with(activity).injector().field("intents").get();
-
-        for (IntentFilter ii : intentFilters) {
-          if (ii.hasAction(Intent.ACTION_MAIN) && ii.hasCategory(Intent.CATEGORY_LAUNCHER)) {
-            ActivityInfo info = Reflect.with(activity).injector().field("info").get();
-            final String className = info.name;
-            PLLogger.d(TAG, "find main activity class: " + className);
-            return className;
-          }
-        }
-      }
-      throw new Exception("not found main activity.");
-    } catch (Exception e) {
-      PLLogger.w(TAG, "findMainActivity: ", e);
-      throw new Exception(e);
-    }
-  }
 
   public void launchAPK(Context context) {
     final String mainActivityName;
     try {
-      mainActivityName = findMainActivity(mApkPath);
+      mainActivityName = AppUtils.findMainActivity(mApkPath);
+
       Class<?> clazz = Reflect.with(mainActivityName).getClazz();
-      System.out.println(clazz);
+      PLLogger.d(TAG, "find main activity" + clazz.getName());
 
       try {
         Intent intent = new Intent();
@@ -92,10 +66,7 @@ public final class Core {
           return;
         }
 
-        intent.setComponent(new ComponentName(
-            pi.packageName,
-            mainActivityName
-        ));
+        intent.setComponent(new ComponentName(pi.packageName, mainActivityName));
         context.startActivity(intent);
       } catch (Throwable e) {
         PLLogger.e(TAG, "start activity", e);
