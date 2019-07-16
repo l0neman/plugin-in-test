@@ -9,10 +9,29 @@ import android.os.IBinder;
  */
 public class ServicePlaceholders {
 
-  public static class Service0 extends Service {
-
+  private static abstract class BaseService extends Service {
     @Override public IBinder onBind(Intent intent) {
       return null;
     }
   }
+
+  public static class Service0 extends BaseService {}
+
+  public static class Service1 extends BaseService {}
+
+  public static class Service2 extends BaseService {}
+
+  public static class Service3 extends BaseService {}
+
+  public static class Service4 extends BaseService {}
+
+  public static class Service5 extends BaseService {}
+
+  public static class Service6 extends BaseService {}
+
+  public static class Service7 extends BaseService {}
+
+  public static class Service8 extends BaseService {}
+
+  public static class Service9 extends BaseService {}
 }

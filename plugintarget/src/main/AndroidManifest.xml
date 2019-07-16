@@ -12,11 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
         <provider
             android:name=".provider.TargetProvider"
             android:authorities="io.l0neman.target.provider"
             android:enabled="true"
-            android:exported="false"></provider>
+            android:exported="false" />
 
         <service
             android:name=".service.TargetService"
@@ -24,6 +25,7 @@
             android:exported="false" />
 
         <activity android:name=".activity.AActivity" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,6 +33,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".receiver.TargetStaticReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.intent.action.SCREEN_ON" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

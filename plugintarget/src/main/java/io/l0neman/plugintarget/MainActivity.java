@@ -1,8 +1,10 @@
 package io.l0neman.plugintarget;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,12 +26,31 @@ public class MainActivity extends BaseUtilsActivity {
 
   private static final String TAG = MainActivity.class.getSimpleName();
 
+  private BroadcastReceiver mTargetDynamicReceiver = new BroadcastReceiver() {
+    @Override public void onReceive(Context context, Intent intent) {
+      TALogger.d(TAG, "receive: " + intent);
+    }
+  };
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     TALogger.d(TAG, "onCreate");
 
     setContentView(getContentView());
+  }
+
+  private void registerReceiver() {
+    IntentFilter intentFilter = new IntentFilter();
+
+    intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+    intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+
+    registerReceiver(mTargetDynamicReceiver, intentFilter);
+  }
+
+  private void unRegisterReveicer() {
+    unregisterReceiver(mTargetDynamicReceiver);
   }
 
   private View getContentView() {
@@ -165,6 +186,8 @@ public class MainActivity extends BaseUtilsActivity {
   @Override protected void onDestroy() {
     super.onDestroy();
     TALogger.d(TAG, "onDestroy");
+
+    unRegisterReveicer();
 
     if (mConn != null) {
       unbindService(mConn);
