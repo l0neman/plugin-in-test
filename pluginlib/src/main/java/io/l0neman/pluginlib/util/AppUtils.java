@@ -19,7 +19,7 @@ public class AppUtils {
 
   public static String findMainActivity(String apkPath) throws Exception {
     try {
-      Object packageParserObject = Reflect.with("android.content.pm.PackageParser").creator().create();
+      Object packageParserObject = Reflect.with(PackageParser.MIRROR_CLASS).creator().create();
       final PackageParser packageParser = PackageParser.mirror(packageParserObject, PackageParser.class);
 
       // find main activity class.

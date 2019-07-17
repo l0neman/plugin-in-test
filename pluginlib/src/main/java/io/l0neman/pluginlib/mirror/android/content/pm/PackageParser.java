@@ -10,11 +10,15 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterT
 /**
  * Created by l0neman on 2019/07/07.
  */
-@MirrorClassName("android.content.pm.PackageParser")
+@MirrorClassName(PackageParser.MIRROR_CLASS)
 public class PackageParser extends MirrorClass {
 
+  public static final String MIRROR_CLASS = "android.content.pm.PackageParser";
+
+  /*
   @MirrorMethodParameterTypes({File.class, int.class})
   public MirrorMethod parsePackage;
+  // */
 
   public Object parsePackage(File packageFile, int flags) {
     return invoke("parsePackage", new Class[]{File.class, int.class}, packageFile, flags);

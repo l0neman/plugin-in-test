@@ -3,16 +3,10 @@ package io.l0neman.pluginlib;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
-
-import java.io.File;
-import java.util.List;
 
 import io.l0neman.pluginlib.hook.android.app.ActivityManagerNativeHook;
 import io.l0neman.pluginlib.hook.android.app.ActivityThreadHook;
-import io.l0neman.pluginlib.mirror.android.content.pm.PackageParser;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.util.AppUtils;
 import io.l0neman.pluginlib.util.ClassLoaderUtils;
@@ -29,10 +23,16 @@ public final class Core {
   }
 
   private String mApkPath;
+  private Context mHostContext;
 
   public void initEnv(Context context) {
+    mHostContext = context;
     ActivityManagerNativeHook.hook();
     ActivityThreadHook.H.hook();
+  }
+
+  public Context getHostContext() {
+    return mHostContext;
   }
 
   public void preloadAPK(Context context, String apkPath) {
@@ -48,7 +48,6 @@ public final class Core {
       PLLogger.w(TAG, "insert code: " + e);
     }
   }
-
 
   public void launchAPK(Context context) {
     final String mainActivityName;
