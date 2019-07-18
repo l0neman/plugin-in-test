@@ -33,7 +33,7 @@ public class MirrorField<T> {
     try {
       return Reflect.with(mField).targetObject(mObject).get();
     } catch (Reflect.ReflectException e) {
-      throw new MirrorException("get field value", e);
+      throw new MirrorException("getSignature field value", e);
     }
   }
 
@@ -41,7 +41,7 @@ public class MirrorField<T> {
     try {
       Reflect.with(mField).targetObject(mObject).set(value);
     } catch (Reflect.ReflectException e) {
-      throw new MirrorException("get field value", e);
+      throw new MirrorException("getSignature field value", e);
     }
   }
 }

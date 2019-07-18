@@ -1,5 +1,6 @@
 package io.l0neman.pluginlib.util.reflect.mirror;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -7,11 +8,13 @@ import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorClassName;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterTypes;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
+import io.l0neman.pluginlib.util.reflect.mirror.util.MethodInfo;
 import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorClassesInfoCache;
 
 /**
  * Created by l0neman on 2019/07/06.
  */
+@SuppressWarnings("ALL")
 public abstract class MirrorClass {
 
   private static MirrorClassesInfoCache sReflectClassesInfoCache = new MirrorClassesInfoCache();
@@ -20,15 +23,7 @@ public abstract class MirrorClass {
   // empty args placeholder.
   private static Class<?>[] ARGS_PLACEHOLDER = new Class[0];
 
-  // connect method parameterTypes class name.
-  private static String getMethodSignature(String name, Class<?>[] parameterTypes) {
-    StringBuilder sb = new StringBuilder();
-    for (Class<?> pt : parameterTypes) {
-      sb.append(pt.getSimpleName());
-    }
-
-    return name + sb.toString();
-  }
+  // child method helper:
 
   protected void construct() {
     construct(null);
@@ -38,6 +33,13 @@ public abstract class MirrorClass {
     if (parameterTypes == null) {
       parameterTypes = ARGS_PLACEHOLDER;
     }
+
+    final Class<? extends MirrorClass> clazz = this.getClass();
+    final MirrorClassesInfoCache.ReflectClassInfo reflectClassInfo =
+        sReflectClassesInfoCache.getReflectClassInfo(clazz);
+
+    String methodSignature = MethodInfo.getSignature("", parameterTypes);
+    Constructor constructor = reflectClassInfo.getConstructor(methodSignature);
 
     throw new AssertionError("not implement.");
   }
@@ -64,7 +66,7 @@ public abstract class MirrorClass {
     final MirrorClassesInfoCache.ReflectClassInfo reflectClassInfo =
         sReflectClassesInfoCache.getReflectClassInfo(clazz);
 
-    String methodSignature = getMethodSignature(methodName, parameterTypes);
+    String methodSignature = MethodInfo.getSignature(methodName, parameterTypes);
     Method method = reflectClassInfo.getMethod(methodSignature);
 
     if (method == null) {
@@ -107,7 +109,7 @@ public abstract class MirrorClass {
 
     final MirrorClassesInfoCache.ReflectClassInfo reflectClassInfo =
         sReflectClassesInfoCache.getReflectClassInfo(mirrorClass);
-    String methodSignature = getMethodSignature(methodName, parameterTypes);
+    String methodSignature = MethodInfo.getSignature(methodName, parameterTypes);
     Method method = reflectClassInfo.getMethod(methodSignature);
 
     Class<?> targetMirrorClass;
@@ -135,11 +137,13 @@ public abstract class MirrorClass {
     }
   }
 
+  // mirror annoation utils:
+
   private static Class<?> getTargetMirrorClass(Class<? extends MirrorClass> mirrorClass)
       throws MirrorException {
     final MirrorClassName mirrorClassName = mirrorClass.getAnnotation(MirrorClassName.class);
     if (mirrorClassName == null) {
-      throw new MirrorException("not get mirror class name, please add MirrorClassName annotation. " +
+      throw new MirrorException("not getSignature mirror class name, please add MirrorClassName annotation. " +
           "mirror class: " + mirrorClass.getSimpleName());
     }
 
@@ -151,13 +155,15 @@ public abstract class MirrorClass {
     final MirrorMethodParameterTypes mirrorMethodParameterTypes =
         mirrorMethod.getAnnotation(MirrorMethodParameterTypes.class);
     if (mirrorMethodParameterTypes == null) {
-      throw new MirrorException("not get mirror method parameter types, " +
+      throw new MirrorException("not getSignature mirror method parameter types, " +
           "please add MirrorMethodParameterTypes annotation. mirror method: " +
           mirrorMethod.getName());
     }
 
     return mirrorMethodParameterTypes.value();
   }
+
+  // mirror utils:
 
   /**
    * Map static members and instance members of a target mirror class.
@@ -168,7 +174,6 @@ public abstract class MirrorClass {
    * @param mirrorClass        mirror class.
    * @param <T>                subclass of MirrorClass
    * @return new mirror class instance that completes the mapping.
-   *
    * @throws MirrorException otherwise.
    */
   @SuppressWarnings("unchecked")
@@ -226,7 +231,7 @@ public abstract class MirrorClass {
         if (MirrorMethod.class.isAssignableFrom(fieldType)) {
           Method targetMirrorMethod;
           final Class<?>[] targetMirrorMethodParameterTypes = getTargetMirrorMethodParameterTypes(field);
-          String methodSignature = getMethodSignature(field.getName(), targetMirrorMethodParameterTypes);
+          String methodSignature = MethodInfo.getSignature(field.getName(), targetMirrorMethodParameterTypes);
 
           if (reflectClassInfo == null) {
             targetMirrorMethod = Reflect.with(targetMirrorClass).invoker().method(field.getName())
@@ -237,7 +242,7 @@ public abstract class MirrorClass {
             targetMirrorMethod = reflectClassInfo.getMethod(methodSignature);
           }
 
-          field.set(mirrorObject, new MirrorMethod(targetMirrorObject, targetMirrorMethod));
+          field.set(mirrorObject, new MirrorMethod(targetMirrorObject, new Method[]{targetMirrorMethod}));
 
           // end mirror method.
         }

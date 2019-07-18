@@ -1,5 +1,6 @@
 package io.l0neman.pluginlib;
 
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,9 +24,9 @@ public final class Core {
   }
 
   private String mApkPath;
-  private Context mHostContext;
+  private Application mHostContext;
 
-  public void initEnv(Context context) {
+  public void initEnv(Application context) {
     mHostContext = context;
     ActivityManagerNativeHook.hook();
     ActivityThreadHook.H.hook();

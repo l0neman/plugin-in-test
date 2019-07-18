@@ -6,6 +6,8 @@ import io.l0neman.pluginlib.util.reflect.mirror.MirrorClass;
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorMethod;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorClassName;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterTypes;
+import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterTypesOverload1;
+import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterTypesOverload2;
 
 /**
  * Created by l0neman on 2019/07/07.
@@ -17,7 +19,6 @@ public class PackageParser extends MirrorClass {
 
   @MirrorMethodParameterTypes({File.class, int.class})
   public MirrorMethod parsePackage;
-
 
   public PackageParser() {
     construct(null);

@@ -29,13 +29,13 @@ public class ServiceManager {
         Uri.parse(ServiceManagerProvider.AUTHORITIES), "$", null, new Bundle());
 
     if (bundle == null) {
-      throw new RuntimeException("get service manager is null. [Bundle]");
+      throw new RuntimeException("getSignature service manager is null. [Bundle]");
     }
 
     IBinder serviceManager = BundleCompat.getBinder(bundle, ServiceManagerProvider.KEY_BINDER);
 
     if (serviceManager == null) {
-      throw new RuntimeException("get service manager is null [getBinder].");
+      throw new RuntimeException("getSignature service manager is null [getBinder].");
     }
 
     serviceManager.linkToDeath(new IBinder.DeathRecipient() {

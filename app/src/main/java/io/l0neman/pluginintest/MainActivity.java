@@ -13,7 +13,6 @@ import java.io.InputStream;
 
 import io.l0neman.pluginlib.Core;
 import io.l0neman.pluginlib.support.PLLogger;
-import io.l0neman.pluginlib.test.Test;
 import io.l0neman.pluginlib.util.concurrent.EasyAsync;
 import io.l0neman.pluginlib.util.file.AEasyDir;
 import io.l0neman.pluginlib.util.file.EasyFile;
@@ -22,11 +21,6 @@ import io.l0neman.pluginlib.util.io.IOUtils;
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = "PluginIn";
-
-  @Override protected void attachBaseContext(Context newBase) {
-    super.attachBaseContext(newBase);
-    Core.getInstance().initEnv(newBase);
-  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
