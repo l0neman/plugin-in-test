@@ -11,9 +11,7 @@ import java.lang.reflect.Proxy;
 
 import io.l0neman.pluginlib.Core;
 import io.l0neman.pluginlib.mirror.android.app.ActivityManagerNative;
-import io.l0neman.pluginlib.placeholder.ActivityPlaceholders;
 import io.l0neman.pluginlib.placeholder.PlaceholderManager;
-import io.l0neman.pluginlib.placeholder.ServicePlaceholders;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.util.Objects;
 import io.l0neman.pluginlib.util.Reflect;

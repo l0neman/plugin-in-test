@@ -17,6 +17,9 @@ public abstract class MirrorClass {
   private static MirrorClassesInfoCache sReflectClassesInfoCache = new MirrorClassesInfoCache();
   Object mTargetMirrorObject;
 
+  // empty args placeholder.
+  private static Class<?>[] ARGS_PLACEHOLDER = new Class[0];
+
   // connect method parameterTypes class name.
   private static String getMethodSignature(String name, Class<?>[] parameterTypes) {
     StringBuilder sb = new StringBuilder();
@@ -27,18 +30,34 @@ public abstract class MirrorClass {
     return name + sb.toString();
   }
 
+  protected void construct() {
+    construct(null);
+  }
+
+  protected void construct(Class<?>[] parameterTypes, Object... args) {
+    if (parameterTypes == null) {
+      parameterTypes = ARGS_PLACEHOLDER;
+    }
+
+    throw new AssertionError("not implement.");
+  }
+
+  protected Object invoke(String methodName) {
+    return invoke(methodName, null);
+  }
+
   /**
    * You need to call this method to provide method information when you need to
    * map an instance method of a target mirror class.
    *
-   * @param methodName           fun name.
+   * @param methodName     fun name.
    * @param parameterTypes fun parameterTypes.
    * @param args           fun pass params.
    * @return The return value of the target mapping method
    */
   protected Object invoke(String methodName, Class<?>[] parameterTypes, Object... args) {
     if (parameterTypes == null) {
-      parameterTypes = new Class[0];
+      parameterTypes = ARGS_PLACEHOLDER;
     }
 
     final Class<? extends MirrorClass> clazz = this.getClass();
@@ -46,7 +65,7 @@ public abstract class MirrorClass {
         sReflectClassesInfoCache.getReflectClassInfo(clazz);
 
     String methodSignature = getMethodSignature(methodName, parameterTypes);
-    Method method = reflectClassInfo.queryMethod(methodSignature);
+    Method method = reflectClassInfo.getMethod(methodSignature);
 
     if (method == null) {
       try {
@@ -56,7 +75,7 @@ public abstract class MirrorClass {
         throw new RuntimeException(e);
       }
 
-      reflectClassInfo.saveMethod(methodName, method);
+      reflectClassInfo.putMethod(methodName, method);
     }
 
     try {
@@ -66,26 +85,30 @@ public abstract class MirrorClass {
     }
   }
 
+  protected static Object invokeStatic(Class<? extends MirrorClass> mirrorClass, String methodName) {
+    return invokeStatic(mirrorClass, methodName, null);
+  }
+
   /**
    * You need to call this method to provide method information when you need to
    * map a static method of the target mirror class.
    *
    * @param mirrorClass    mirror class
-   * @param methodName           fun name.
+   * @param methodName     fun name.
    * @param parameterTypes fun parameterTypes.
    * @param args           fun pass params.
    * @return The return value of the target mapping method
    */
-  protected static Object invokeStatic(Class<?extends MirrorClass> mirrorClass, String methodName,
+  protected static Object invokeStatic(Class<? extends MirrorClass> mirrorClass, String methodName,
                                        Class<?>[] parameterTypes, Object... args) {
     if (parameterTypes == null) {
-      parameterTypes = new Class[0];
+      parameterTypes = ARGS_PLACEHOLDER;
     }
 
     final MirrorClassesInfoCache.ReflectClassInfo reflectClassInfo =
         sReflectClassesInfoCache.getReflectClassInfo(mirrorClass);
     String methodSignature = getMethodSignature(methodName, parameterTypes);
-    Method method = reflectClassInfo.queryMethod(methodSignature);
+    Method method = reflectClassInfo.getMethod(methodSignature);
 
     Class<?> targetMirrorClass;
     try {
@@ -102,7 +125,7 @@ public abstract class MirrorClass {
         throw new RuntimeException(e);
       }
 
-      reflectClassInfo.saveMethod(methodName, method);
+      reflectClassInfo.putMethod(methodName, method);
     }
 
     try {
@@ -145,6 +168,7 @@ public abstract class MirrorClass {
    * @param mirrorClass        mirror class.
    * @param <T>                subclass of MirrorClass
    * @return new mirror class instance that completes the mapping.
+   *
    * @throws MirrorException otherwise.
    */
   @SuppressWarnings("unchecked")
@@ -158,7 +182,7 @@ public abstract class MirrorClass {
 
     if (reflectClassInfo == null) {
       newReflectClassInfo = new MirrorClassesInfoCache.ReflectClassInfo();
-      sReflectClassesInfoCache.saveReflectClassInfo(mirrorClass, newReflectClassInfo);
+      sReflectClassesInfoCache.putReflectClassInfo(mirrorClass, newReflectClassInfo);
     }
 
     try {
@@ -188,9 +212,9 @@ public abstract class MirrorClass {
             targetMirrorField = Reflect.with(targetMirrorClass).injector().field(field.getName())
                 .getField();
 
-            newReflectClassInfo.saveField(field.getName(), targetMirrorField);
+            newReflectClassInfo.putField(field.getName(), targetMirrorField);
           } else {
-            targetMirrorField = reflectClassInfo.queryField(field.getName());
+            targetMirrorField = reflectClassInfo.getField(field.getName());
           }
 
           field.set(mirrorObject, new MirrorField(targetMirrorObject, targetMirrorField));
@@ -208,9 +232,9 @@ public abstract class MirrorClass {
             targetMirrorMethod = Reflect.with(targetMirrorClass).invoker().method(field.getName())
                 .paramsType(targetMirrorMethodParameterTypes).getMethod();
 
-            newReflectClassInfo.saveMethod(methodSignature, targetMirrorMethod);
+            newReflectClassInfo.putMethod(methodSignature, targetMirrorMethod);
           } else {
-            targetMirrorMethod = reflectClassInfo.queryMethod(methodSignature);
+            targetMirrorMethod = reflectClassInfo.getMethod(methodSignature);
           }
 
           field.set(mirrorObject, new MirrorMethod(targetMirrorObject, targetMirrorMethod));

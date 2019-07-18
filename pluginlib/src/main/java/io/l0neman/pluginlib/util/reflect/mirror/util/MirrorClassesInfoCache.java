@@ -1,5 +1,6 @@
 package io.l0neman.pluginlib.util.reflect.mirror.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -15,21 +16,30 @@ public class MirrorClassesInfoCache {
   public static class ReflectClassInfo {
     private Map<String, Method> mMethodsInfo = new HashMap<>();
     private Map<String, Field> mFieldsInfo = new HashMap<>();
+    private Map<String, Constructor> mConstructorInfo = new HashMap<>();
 
-    public void saveMethod(String methodSignature, Method method) {
+    public void putMethod(String methodSignature, Method method) {
       mMethodsInfo.put(methodSignature, method);
     }
 
-    public void saveField(String fieldName, Field field) {
-      mFieldsInfo.put(fieldName, field);
-    }
-
-    public Method queryMethod(String methodSignature) {
+    public Method getMethod(String methodSignature) {
       return mMethodsInfo.get(methodSignature);
     }
 
-    public Field queryField(String fieldName) {
+    public void putField(String fieldName, Field field) {
+      mFieldsInfo.put(fieldName, field);
+    }
+
+    public Field getField(String fieldName) {
       return mFieldsInfo.get(fieldName);
+    }
+
+    public void putConstructor(String methodSignature, Constructor constructor) {
+      mConstructorInfo.put(methodSignature, constructor);
+    }
+
+    public Constructor getConstructor(String methodSignature) {
+      return mConstructorInfo.get(methodSignature);
     }
   }
 
@@ -37,7 +47,7 @@ public class MirrorClassesInfoCache {
     return mClassInfo.get(clazz);
   }
 
-  public void saveReflectClassInfo(Class<?> clazz, ReflectClassInfo reflectClassInfo) {
+  public void putReflectClassInfo(Class<?> clazz, ReflectClassInfo reflectClassInfo) {
     mClassInfo.put(clazz, reflectClassInfo);
   }
 }

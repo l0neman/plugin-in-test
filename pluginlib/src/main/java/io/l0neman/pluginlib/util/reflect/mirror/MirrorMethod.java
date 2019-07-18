@@ -8,7 +8,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
 /**
  * Created by l0neman on 2019/07/06.
  */
-public class MirrorMethod {
+public class MirrorMethod<T> {
 
   private Object mObject;
   private final Method mMethod;
@@ -28,7 +28,7 @@ public class MirrorMethod {
     this.mObject = mObject;
   }
 
-  public Object invoke(Object... args) throws MirrorException {
+  public T invoke(Object... args) throws MirrorException {
     try {
       return Reflect.with(mMethod).targetObject(mObject).invoke(args);
     } catch (Exception e) {
