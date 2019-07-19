@@ -5,9 +5,9 @@ import android.os.Handler;
 
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorClass;
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorField;
-import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorClassName;
+import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
 
-@MirrorClassName("android.app.ActivityThread")
+@TargetMirrorClassName("android.app.ActivityThread")
 public class ActivityThread extends MirrorClass {
 
   public static MirrorField sCurrentActivityThread;

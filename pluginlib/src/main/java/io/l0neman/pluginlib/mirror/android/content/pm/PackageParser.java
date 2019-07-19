@@ -4,20 +4,18 @@ import java.io.File;
 
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorClass;
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorMethod;
-import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorClassName;
-import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterTypes;
-import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterTypesOverload1;
-import io.l0neman.pluginlib.util.reflect.mirror.annoation.MirrorMethodParameterTypesOverload2;
+import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
+import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterTypes;
 
 /**
  * Created by l0neman on 2019/07/07.
  */
-@MirrorClassName(PackageParser.MIRROR_CLASS)
+@TargetMirrorClassName(PackageParser.MIRROR_CLASS)
 public class PackageParser extends MirrorClass {
 
   public static final String MIRROR_CLASS = "android.content.pm.PackageParser";
 
-  @MirrorMethodParameterTypes({File.class, int.class})
+  @MethodParameterTypes({File.class, int.class})
   public MirrorMethod parsePackage;
 
   public PackageParser() {

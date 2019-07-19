@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface MirrorMethodParameterTypesOverload2 {
-  Class<?>[] overload0();
+public @interface MethodParameterClassesOverload2 {
+  String[] overload0();
 
-  Class<?>[] overload1();
+  String[] overload1();
 
-  Class<?>[] overload2();
+  String[] overload2();
 }

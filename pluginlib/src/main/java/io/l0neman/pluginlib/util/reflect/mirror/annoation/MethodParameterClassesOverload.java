@@ -5,11 +5,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Created by l0neman on 2019/07/07.
- */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface MirrorMethodParameterTypes {
-  Class<?>[] value();
+public @interface MethodParameterClassesOverload {
+  String[] overload0();
+
+  String[] overload1();
 }

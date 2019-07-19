@@ -22,14 +22,8 @@ public class Reflect {
 
   public static class ReflectException extends Exception {
 
-    private Exception original;
-
     public ReflectException(String message, Throwable cause) {
       super(message, cause);
-    }
-
-    public Exception getOriginal() {
-      return original;
     }
   }
 
@@ -86,7 +80,7 @@ public class Reflect {
     return invoker;
   }
 
-  public Injector injector() {
+  public final Injector injector() {
     final Injector injector = new Injector();
     injector.mClass = mClass;
     injector.mObject = mObject;
@@ -94,7 +88,7 @@ public class Reflect {
     return injector;
   }
 
-  public Invoker invoker() {
+  public final Invoker invoker() {
     final Invoker invoker = new Invoker();
     invoker.mClass = mClass;
     invoker.mObject = mObject;
@@ -102,7 +96,7 @@ public class Reflect {
     return invoker;
   }
 
-  public Creator creator() {
+  public final Creator creator() {
     final Creator creator = new Creator();
     creator.mClass = mClass;
     creator.mObject = mObject;
@@ -122,23 +116,21 @@ public class Reflect {
 
     private Creator() {}
 
-    public <T> T create() throws ReflectException {
-      try {
-        if (constructor != null) {
-          // noinspection unchecked
-          return (T) constructor.newInstance();
-        }
-
-        // noinspection unchecked
-        return (T) getClazz().newInstance();
-      } catch (Exception e) {
-        throw new ReflectException("build", e);
-      }
-    }
-
     public Creator parameterTypes(Class<?>... constructorParameterTypes) {
       this.constructorParameterTypes = constructorParameterTypes;
       return this;
+    }
+
+    public Constructor<?> getConstructor() throws ReflectException {
+      try {
+        final Constructor<?> constructor = Compat.classFGetConstructor(
+            getClazz(), constructorParameterTypes);
+        constructor.setAccessible(true);
+
+        return constructor;
+      } catch (Exception e) {
+        throw new ReflectException("Creator getConstructor", e);
+      }
     }
 
     public <T> T create(Object... params) throws ReflectException {
@@ -202,7 +194,7 @@ public class Reflect {
 
         return field;
       } catch (Exception e) {
-        throw new ReflectException("injector getSignature", e);
+        throw new ReflectException("injector getField", e);
       }
     }
 
@@ -283,7 +275,7 @@ public class Reflect {
 
         return targetMethod;
       } catch (Exception e) {
-        throw new ReflectException("Invoker invoke", e);
+        throw new ReflectException("Invoker getMethod", e);
       }
     }
 

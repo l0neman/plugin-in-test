@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface MethodParameterTypesOverload2 {
-  String[] overload0();
+  Class<?>[] overload0();
 
-  String[] overload1();
+  Class<?>[] overload1();
 
-  String[] overload2();
+  Class<?>[] overload2();
 }

@@ -1,59 +1,55 @@
 package io.l0neman.pluginlib.util.reflect.mirror;
 
-import androidx.collection.ArrayMap;
-
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
-import io.l0neman.pluginlib.util.reflect.mirror.util.MethodInfo;
+import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
 
 /**
  * Created by l0neman on 2019/07/18.
  */
 public class MirrorConstructor<T> {
-  private Constructor<T> mConstructor;
-  private Map<String, Constructor<T>> mOverloadConstructorMap;
+  private Constructor mConstructor;
+  private Map<String, Constructor> mOverloadConstructorMap = new HashMap<>();
 
-  public MirrorConstructor(Constructor<T>[] overloadConstructor) {
+  public MirrorConstructor(Constructor[] overloadConstructor) {
     if (overloadConstructor.length == 1) {
-      this.mConstructor = overloadConstructor[0];
-      return;
+      mConstructor = overloadConstructor[0];
     }
 
-    mOverloadConstructorMap = new ArrayMap<>();
-
-    for (Constructor<T> constructor : overloadConstructor) {
-      mOverloadConstructorMap.put(
-          MethodInfo.getSignature("", constructor.getParameterTypes()),
-          constructor);
-    }
-  }
-
-  public boolean isOverload() {
-    return mOverloadConstructorMap != null;
-  }
-
-  public T newInstance() throws MirrorException {
-    try {
-      return Reflect.with(mConstructor).create();
-    } catch (Reflect.ReflectException e) {
-      throw new MirrorException("newInstance", e);
+    for (Constructor constructor : overloadConstructor) {
+      mOverloadConstructorMap.put(MethodHelper.getSignature("c",
+          constructor.getParameterTypes()), constructor);
     }
   }
 
   public T newInstance(Object... args) throws MirrorException {
+    if (mConstructor == null) {
+      return newInstanceOverload((String[]) null, args);
+    }
+
     try {
-      return Reflect.with(mConstructor).create();
+      return Reflect.with(mConstructor).create(args);
     } catch (Reflect.ReflectException e) {
       throw new MirrorException("newInstance", e);
     }
   }
 
-  public T newInstance(Class<?>[] parameterTypes, Object... args) throws MirrorException {
-    Constructor<T> constructor = mOverloadConstructorMap.get(MethodInfo.getSignature("", parameterTypes));
+  public T newInstanceOverload(String[] parameterTypes, Object... args) throws MirrorException {
+    return newInstanceOverload(MethodHelper.getParameterTypes(parameterTypes), args);
+  }
+
+  public T newInstanceOverload(Class[] parameterTypes, Object... args) throws MirrorException {
+    if (parameterTypes == null) {
+      parameterTypes = new Class[0];
+    }
+
+    Constructor constructor = mOverloadConstructorMap.get(MethodHelper.getSignature("c", parameterTypes));
+
     if (constructor == null) {
       throw new MirrorException("not found method: " + Arrays.toString(parameterTypes));
     }

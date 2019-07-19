@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by l0neman on 2019/07/07.
+ * Created by l0neman on 2019/07/19.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface MethodParameterTypes {
-  Class<?>[] value();
+@Target(ElementType.TYPE)
+public @interface TargetMirrorClass {
+  Class<?> value();
 }
