@@ -11,9 +11,12 @@ import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
 
 /**
  * Created by l0neman on 2019/07/18.
+ * <p>
+ * The mapping of the constructor of the target mirror class.
  */
 public class MirrorConstructor<T> {
   private Constructor mConstructor;
+  // for overload constructors.
   private Map<String, Constructor> mOverloadConstructorMap = new HashMap<>();
 
   public MirrorConstructor(Constructor[] overloadConstructor) {
@@ -27,9 +30,18 @@ public class MirrorConstructor<T> {
     }
   }
 
+  /**
+   * Create an object of the new target mirror type.
+   * <p>
+   * for no overloaded constructor.
+   *
+   * @param args constructor parameters.
+   * @return new target mirror object.
+   * @throws MirrorException otherwise.
+   */
   public T newInstance(Object... args) throws MirrorException {
     if (mConstructor == null) {
-      return newInstanceOverload((String[]) null, args);
+      return newInstanceOverload((Class[]) null, args);
     }
 
     try {
@@ -39,10 +51,23 @@ public class MirrorConstructor<T> {
     }
   }
 
+  /**
+   * @see #newInstanceOverload(Class[], Object...)
+   */
   public T newInstanceOverload(String[] parameterTypes, Object... args) throws MirrorException {
     return newInstanceOverload(MethodHelper.getParameterTypes(parameterTypes), args);
   }
 
+  /**
+   * Create an object of the new target mirror type.
+   * <p>
+   * for overloaded constructor.
+   *
+   * @param parameterTypes constructor parameter type names.
+   * @param args           constructor parameters.
+   * @return new target mirror object.
+   * throws MirrorException otherwise.
+   */
   public T newInstanceOverload(Class[] parameterTypes, Object... args) throws MirrorException {
     if (parameterTypes == null) {
       parameterTypes = new Class[0];

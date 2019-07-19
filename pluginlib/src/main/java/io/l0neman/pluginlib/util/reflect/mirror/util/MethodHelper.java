@@ -19,7 +19,7 @@ public class MethodHelper {
    * Example:
    * testMethod(java.lang.String, int, boolean); => testMethodStinbo
    * <p>
-   * 方法名和每种参数类型的前两个字符组合，（两个字符不会导致签名出现重复）。
+   * 方法名和每种参数类型的前两个字符组合，（两个字符避免导致签名出现重复）。
    *
    * @param methodName     方法名称。
    * @param parameterTypes 参数类型。
@@ -39,13 +39,18 @@ public class MethodHelper {
   /**
    * @param method method.
    * @return method signature.
-   *
    * @see #getSignature(String, Class[])
    */
   public static String getSignature(Method method) {
     return getSignature(method.getName(), method.getParameterTypes());
   }
 
+  /**
+   * covert string[] to class[].
+   *
+   * @param parameterClasses parameter class names.
+   * @return class[]
+   */
   public static Class<?>[] getParameterTypes(String[] parameterClasses) {
     Class<?>[] parameterTypes = new Class[parameterClasses.length];
     for (int i = 0; i < parameterTypes.length; i++) {
@@ -55,6 +60,7 @@ public class MethodHelper {
     return parameterTypes;
   }
 
+  // class for name, support primitive types.
   private static Class<?> forName(String className) {
     if ("byte".equals(className)) {
       return byte.class;
@@ -92,7 +98,7 @@ public class MethodHelper {
   }
 
   /**
-   * get all overload method parameterTypes from annotation.
+   * get all overload method parameter types from annotation.
    */
   public static Class<?>[][] getMirrorOverloadMethodParameterTypes(Field mirrorMethod) {
 

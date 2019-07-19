@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Created by l0neman on 2019/07/19.
+ * <p>
+ * Specify the class of the target mirror class.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

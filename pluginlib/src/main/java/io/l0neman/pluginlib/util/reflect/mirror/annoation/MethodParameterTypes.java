@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Created by l0neman on 2019/07/07.
+ * <p>
+ * Specify the parameter type of the constructor or method.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -16,6 +16,8 @@ import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorClassInfo;
 
 /**
  * Created by l0neman on 2019/07/19.
+ * <p>
+ * Target mirror class.
  */
 public class MirrorClass {
   private static Map<Class<?>, MirrorClassInfo> sReflectClassesInfoCache = new ConcurrentHashMap<>();
@@ -44,10 +46,24 @@ public class MirrorClass {
     return MethodHelper.getParameterTypes(parameterTypes);
   }
 
+  /**
+   * for no parameter constructor.
+   *
+   * @see #construct(Class, Class[], Object...)
+   */
   protected void construct(Class<? extends MirrorClass> mirrorClass) throws InvokeRuntimeException {
     construct(mirrorClass, null);
   }
 
+  /**
+   * When you need to map the constructor of the target mirror class,
+   * you need to call this method to construct and map the target object.
+   *
+   * @param mirrorClass    mirror class.
+   * @param parameterTypes constructor parameterTypes.
+   * @param args           constructor parameters.
+   * @throws InvokeRuntimeException otherwise.
+   */
   protected void construct(Class<? extends MirrorClass> mirrorClass, Class<?>[] parameterTypes,
                            Object... args)
       throws InvokeRuntimeException {
@@ -100,17 +116,22 @@ public class MirrorClass {
     }
   }
 
+  /**
+   * for no parameter method.
+   *
+   * @see #invoke(String, Class[], Object...)
+   */
   protected <T> T invoke(String methodName) throws InvokeRuntimeException {
-    return invoke(methodName, null);
+    return invoke(methodName, (Class<?>[]) null);
   }
 
   /**
    * You need to call this method to provide method information when you need to
    * map an instance method of a target mirror class.
    *
-   * @param methodName     fun name.
-   * @param parameterTypes fun parameterTypes.
-   * @param args           fun pass params.
+   * @param methodName     method name.
+   * @param parameterTypes method parameterTypes.
+   * @param args           method parameters.
    * @return The return value of the target mapping method
    */
   protected <T> T invoke(String methodName, Class<?>[] parameterTypes, Object... args)
@@ -146,10 +167,31 @@ public class MirrorClass {
     }
   }
 
+  /**
+   * @see #invoke(String, Class[], Object...)
+   */
+  protected <T> T invoke(String methodName, String[] parameterTypes, Object... args)
+      throws InvokeRuntimeException {
+    return invoke(methodName, $(parameterTypes), args);
+  }
+
+  /**
+   * for no parameter static method.
+   *
+   * @see #invokeStatic(Class, String, Class[], Object...)
+   */
   protected static <T> T invokeStatic(Class<? extends MirrorClass> mirrorClass, String methodName)
       throws InvokeRuntimeException {
 
-    return invokeStatic(mirrorClass, methodName, null);
+    return invokeStatic(mirrorClass, methodName, (Class<?>[]) null);
+  }
+
+  /**
+   * @see #invokeStatic(Class, String, Class[], Object...)
+   */
+  protected static <T> T invokeStatic(Class<? extends MirrorClass> mirrorClass, String methodName,
+                                      String[] parameterTypes, Object... args) {
+    return invokeStatic(mirrorClass, methodName, $(parameterTypes), args);
   }
 
   /**
@@ -157,9 +199,9 @@ public class MirrorClass {
    * map a static method of the target mirror class.
    *
    * @param mirrorClass    mirror class
-   * @param methodName     fun name.
-   * @param parameterTypes fun parameterTypes.
-   * @param args           fun pass params.
+   * @param methodName     method name.
+   * @param parameterTypes method parameterTypes.
+   * @param args           method parameters.
    * @return The return value of the target mapping method
    */
   protected static <T> T invokeStatic(Class<? extends MirrorClass> mirrorClass, String methodName,
@@ -218,14 +260,13 @@ public class MirrorClass {
   // mirror utils:
 
   /**
-   * Map all members.
+   * Map all members of the target map class.
    * <p>
    *
    * @param targetMirrorObject target mirror class instance.
    * @param mirrorClass        mirror class.
    * @param <T>                subclass of MirrorClass
    * @return new mirror class instance that completes the mapping.
-   *
    * @throws MirrorException otherwise.
    */
   public static <T extends MirrorClass> T map(Object targetMirrorObject, Class<T> mirrorClass)
@@ -303,9 +344,10 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, new MirrorConstructor(targetMirrorOverloadConstructor));
-          } else if (!isStatic && !forClass) {
-            field.set(mirrorObject, new MirrorConstructor(targetMirrorOverloadConstructor));
-          }
+          } else
+            if (!isStatic && !forClass) {
+              field.set(mirrorObject, new MirrorConstructor(targetMirrorOverloadConstructor));
+            }
 
           continue; // end mirror constructor.
         }
@@ -325,9 +367,10 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, new MirrorField(targetMirrorField));
-          } else if (!isStatic && !forClass) {
-            field.set(mirrorObject, new MirrorField(targetMirrorObject, targetMirrorField));
-          }
+          } else
+            if (!isStatic && !forClass) {
+              field.set(mirrorObject, new MirrorField(targetMirrorObject, targetMirrorField));
+            }
 
           continue; // end mirror field.
         }
@@ -363,9 +406,10 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, new MirrorMethod(targetMirrorOverloadMethod));
-          } else if (!isStatic && !forClass) {
-            field.set(mirrorObject, new MirrorMethod(targetMirrorObject, targetMirrorOverloadMethod));
-          }
+          } else
+            if (!isStatic && !forClass) {
+              field.set(mirrorObject, new MirrorMethod(targetMirrorObject, targetMirrorOverloadMethod));
+            }
 
           continue; // end mirror method.
         }
@@ -380,9 +424,10 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, mapClass);
-          } else if (!isStatic && !forClass) {
-            field.set(mirrorObject, mapClass);
-          }
+          } else
+            if (!isStatic && !forClass) {
+              field.set(mirrorObject, mapClass);
+            }
 
         }
       }
@@ -392,7 +437,7 @@ public class MirrorClass {
   }
 
   /**
-   * Mapping static members.
+   * Maps static members of the target mirror class.
    *
    * @param mirrorClass mirror class.
    * @throws MirrorException otherwise.

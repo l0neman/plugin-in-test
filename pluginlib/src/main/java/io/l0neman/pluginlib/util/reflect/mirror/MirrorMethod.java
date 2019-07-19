@@ -11,6 +11,8 @@ import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
 
 /**
  * Created by l0neman on 2019/07/06.
+ * <p>
+ * The mapping of the constructor of the target mirror classe.
  */
 public class MirrorMethod<T> {
 
@@ -39,13 +41,27 @@ public class MirrorMethod<T> {
     }
   }
 
+  /**
+   * Set the target call object.
+   *
+   * @param mObject target call object.
+   */
   public void setObject(Object mObject) {
     this.mObject = mObject;
   }
 
+  /**
+   * Method of calling a target mirror object.
+   * <p>
+   * for no overloaded method.
+   *
+   * @param args method parameters.
+   * @return method return value.
+   * @throws MirrorException otherwise.
+   */
   public T invoke(Object... args) throws MirrorException {
     if (mMethod == null) {
-      return invokeOverload((String[]) null, args);
+      return invokeOverload((Class[]) null, args);
     }
 
     try {
@@ -55,10 +71,23 @@ public class MirrorMethod<T> {
     }
   }
 
+  /**
+   * @see #invokeOverload(Class[], Object...)
+   */
   public T invokeOverload(String[] parameterTypes, Object... args) throws MirrorException {
     return invokeOverload(MethodHelper.getParameterTypes(parameterTypes), args);
   }
 
+  /**
+   * Method of calling a target mirror object.
+   * <p>
+   * for overloaded method.
+   *
+   * @param parameterTypes method parameter type names.
+   * @param args           method parameters.
+   * @return method return value.
+   * @throws MirrorException otherwise.
+   */
   public T invokeOverload(Class[] parameterTypes, Object... args) throws MirrorException {
     if (parameterTypes == null) {
       parameterTypes = new Class[0];

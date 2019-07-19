@@ -8,6 +8,8 @@ import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
 
 /**
  * Created by l0neman on 2019/07/06.
+ * <p>
+ * The mapping of the field of the target mirror class.
  */
 public class MirrorField<T> {
 
@@ -25,10 +27,21 @@ public class MirrorField<T> {
     this.mField = mField;
   }
 
+  /**
+   * Set the target call object.
+   *
+   * @param mObject target call object.
+   */
   public void setObject(Object mObject) {
     this.mObject = mObject;
   }
 
+  /**
+   * get field value.
+   *
+   * @return field's value.
+   * @throws MirrorException otherwise.
+   */
   public T get() throws MirrorException {
     try {
       return Reflect.with(mField).targetObject(mObject).get();
@@ -37,6 +50,12 @@ public class MirrorField<T> {
     }
   }
 
+  /**
+   * set field value.
+   *
+   * @param value new value.
+   * @throws MirrorException otherwise.
+   */
   public void set(Object value) throws MirrorException {
     try {
       Reflect.with(mField).targetObject(mObject).set(value);
