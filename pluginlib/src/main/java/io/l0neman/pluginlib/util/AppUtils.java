@@ -3,6 +3,7 @@ package io.l0neman.pluginlib.util;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 
 import java.io.File;
 import java.util.List;
@@ -17,13 +18,24 @@ public class AppUtils {
 
   private static final String TAG = AppUtils.class.getSimpleName();
 
-  public static String findMainActivity(String apkPath) throws Exception {
-    try {
-      Object packageParserObject = Reflect.with(PackageParser.MIRROR_CLASS).creator().create();
-      final PackageParser packageParser = PackageParser.mirror(packageParserObject, PackageParser.class);
+  private static Singleton<AppUtils> sSingleton = new Singleton<AppUtils>() {
+    @Override protected AppUtils create() {
+      return new AppUtils();
+    }
+  };
 
+  private AppUtils() {}
+
+  public static AppUtils getInstance() {
+    return sSingleton.get();
+  }
+
+  private PackageParser mPackageParser = new PackageParser();
+
+  public String findMainActivity(String apkPath) throws Exception {
+    try {
       // find main activity class.
-      final Object packageObject = packageParser.parsePackage(new File(apkPath), 0);
+      final Object packageObject = mPackageParser.parsePackage(new File(apkPath), 0);
 
       List activities = Reflect.with(packageObject).injector().field("activities").get();
 
@@ -41,9 +53,23 @@ public class AppUtils {
       }
       throw new Exception("not found main activity.");
     } catch (Exception e) {
-      PLLogger.w(TAG, "findMainActivity: ", e);
+      PLLogger.w(TAG, "find main activity", e);
       throw new Exception(e);
     }
   }
 
+  public String findApplication(String apkPath) throws Exception {
+    try {
+      final Object parsePackage = mPackageParser.parsePackage(new File(apkPath), 0);
+      ApplicationInfo appInfo = Reflect.with(parsePackage).injector().field("applicationInfo").get();
+      if (appInfo == null) {
+        return null;
+      }
+
+      return appInfo.name;
+    } catch (Exception e) {
+      PLLogger.w(TAG, "find application", e);
+      return null;
+    }
+  }
 }

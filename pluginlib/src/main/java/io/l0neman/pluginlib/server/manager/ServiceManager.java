@@ -1,4 +1,4 @@
-package io.l0neman.pluginlib.support.server;
+package io.l0neman.pluginlib.server.manager;
 
 import android.content.Context;
 import android.net.Uri;

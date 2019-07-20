@@ -1,4 +1,4 @@
-package io.l0neman.pluginlib.placeholder;
+package io.l0neman.pluginlib.support.placeholder;
 
 import android.app.Service;
 import android.content.Intent;

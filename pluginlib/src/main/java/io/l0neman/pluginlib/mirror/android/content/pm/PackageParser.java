@@ -15,14 +15,11 @@ public class PackageParser extends MirrorClass {
 
   public static final String MIRROR_CLASS = "android.content.pm.PackageParser";
 
-  @MethodParameterTypes({File.class, int.class})
-  public MirrorMethod parsePackage;
-
   public PackageParser() {
-    construct(null);
+    construct(PackageParser.class);
   }
 
   public Object parsePackage(File packageFile, int flags) {
-    return invoke("parsePackage", new Class[]{File.class, int.class}, packageFile, flags);
+    return invoke("parsePackage", $(File.class, int.class), packageFile, flags);
   }
 }

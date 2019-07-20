@@ -1,8 +1,9 @@
 package io.l0neman.pluginlib.util.reflect.mirror;
 
+import androidx.collection.ArrayMap;
+
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import io.l0neman.pluginlib.util.Reflect;
@@ -17,7 +18,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
 public class MirrorConstructor<T> {
   private Constructor mConstructor;
   // for overload constructors.
-  private Map<String, Constructor> mOverloadConstructorMap = new HashMap<>();
+  private Map<String, Constructor> mOverloadConstructorMap = new ArrayMap<>();
 
   public MirrorConstructor(Constructor[] overloadConstructor) {
     if (overloadConstructor.length == 1) {

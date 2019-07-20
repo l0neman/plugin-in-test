@@ -10,8 +10,16 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
 @TargetMirrorClassName("android.app.ActivityThread")
 public class ActivityThread extends MirrorClass {
 
+  static {
+    mapQuiet(ActivityThread.class);
+  }
+
   public static MirrorField sCurrentActivityThread;
   public MirrorField<Handler> mH;
+
+  public String getProcessName() {
+    return invoke("getProcessName");
+  }
 
   public static class H {
     public static final int LAUNCH_ACTIVITY = 100;

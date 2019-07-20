@@ -35,14 +35,11 @@ public class MainActivity extends AppCompatActivity {
     EasyAsync.get(new EasyAsync.Executor<File>() {
       @Override public File run() {
         try {
-          final InputStream is = getAssets().open("target/plusmany.apk");
+          final InputStream is = getAssets().open("target/target.apk");
 
           File targetAPK = new File(AEasyDir.getDir(MainActivity.this, "target"), "target.apk");
 
-          if (targetAPK.exists()) {
-            return targetAPK;
-          }
-
+          EasyFile.deleteFile(targetAPK);
           EasyFile.createFile(targetAPK);
 
           IOUtils.transfer(is, new FileOutputStream(targetAPK), true);

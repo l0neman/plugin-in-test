@@ -1,5 +1,7 @@
 package io.l0neman.pluginlib.util.reflect.mirror;
 
+import android.util.Log;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -267,6 +269,7 @@ public class MirrorClass {
    * @param mirrorClass        mirror class.
    * @param <T>                subclass of MirrorClass
    * @return new mirror class instance that completes the mapping.
+   *
    * @throws MirrorException otherwise.
    */
   public static <T extends MirrorClass> T map(Object targetMirrorObject, Class<T> mirrorClass)
@@ -314,6 +317,11 @@ public class MirrorClass {
         final Class<?> fieldType = field.getType();
         final boolean isStatic = Modifier.isStatic(field.getModifiers());
 
+        // skip constants.
+        if (isStatic && Modifier.isFinal(field.getModifiers())) {
+          continue;
+        }
+
         // for mirror constructor.
         if (MirrorConstructor.class.isAssignableFrom(fieldType)) {
           Constructor[] targetMirrorOverloadConstructor;
@@ -344,10 +352,9 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, new MirrorConstructor(targetMirrorOverloadConstructor));
-          } else
-            if (!isStatic && !forClass) {
-              field.set(mirrorObject, new MirrorConstructor(targetMirrorOverloadConstructor));
-            }
+          } else if (!isStatic && !forClass) {
+            field.set(mirrorObject, new MirrorConstructor(targetMirrorOverloadConstructor));
+          }
 
           continue; // end mirror constructor.
         }
@@ -367,10 +374,9 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, new MirrorField(targetMirrorField));
-          } else
-            if (!isStatic && !forClass) {
-              field.set(mirrorObject, new MirrorField(targetMirrorObject, targetMirrorField));
-            }
+          } else if (!isStatic && !forClass) {
+            field.set(mirrorObject, new MirrorField(targetMirrorObject, targetMirrorField));
+          }
 
           continue; // end mirror field.
         }
@@ -406,10 +412,9 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, new MirrorMethod(targetMirrorOverloadMethod));
-          } else
-            if (!isStatic && !forClass) {
-              field.set(mirrorObject, new MirrorMethod(targetMirrorObject, targetMirrorOverloadMethod));
-            }
+          } else if (!isStatic && !forClass) {
+            field.set(mirrorObject, new MirrorMethod(targetMirrorObject, targetMirrorOverloadMethod));
+          }
 
           continue; // end mirror method.
         }
@@ -424,15 +429,27 @@ public class MirrorClass {
 
           if (isStatic && forClass) {
             field.set(null, mapClass);
-          } else
-            if (!isStatic && !forClass) {
-              field.set(mirrorObject, mapClass);
-            }
+          } else if (!isStatic && !forClass) {
+            field.set(mirrorObject, mapClass);
+          }
 
         }
       }
     } catch (Exception e) {
       throw new MirrorException("map", e);
+    }
+  }
+
+  /**
+   * ignore exceptions.
+   *
+   * @see #map(Class)
+   */
+  public static void mapQuiet(Class<? extends MirrorClass> mirrorClass) {
+    try {
+      map(null, mirrorClass);
+    } catch (MirrorException e) {
+      Log.w("mirror", "mirror for " + mirrorClass, e);
     }
   }
 

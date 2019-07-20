@@ -1,7 +1,4 @@
-package io.l0neman.pluginlib.placeholder;
-
-import android.app.Activity;
-import android.app.Service;
+package io.l0neman.pluginlib.support.placeholder;
 
 import androidx.collection.ArrayMap;
 
@@ -9,7 +6,7 @@ import java.util.Map;
 
 import io.l0neman.pluginlib.util.Singleton;
 
-public class PlaceholderManager {
+public class PlaceholderHelper {
 
   private static final int ACTIVITY_MAX = 9;
   private static final int SERVICE_MAX = 9;
@@ -17,8 +14,8 @@ public class PlaceholderManager {
   private int mActivityIndex;
   private int mServiceIndex;
 
-  private Map<String, Class<? extends Activity>> mActivityMap = new ArrayMap<>();
-  private Map<String, Class<? extends Service>> mServiceMap = new ArrayMap<>();
+  private Map<String, String> mActivityMap = new ArrayMap<>();
+  private Map<String, String> mServiceMap = new ArrayMap<>();
 
   private Class[] mActivityClasses = {
       ActivityPlaceholders.Activity0.class,
@@ -49,46 +46,45 @@ public class PlaceholderManager {
   private Map<String, String> mActivityKeyMap = new ArrayMap<>();
   private Map<String, String> mServiceKeyMap = new ArrayMap<>();
 
-  private static Singleton<PlaceholderManager> sInstance = new Singleton<PlaceholderManager>() {
-    @Override protected PlaceholderManager create() {
-      return new PlaceholderManager();
+  private static Singleton<PlaceholderHelper> sInstance = new Singleton<PlaceholderHelper>() {
+    @Override protected PlaceholderHelper create() {
+      return new PlaceholderHelper();
     }
   };
 
-  public static PlaceholderManager getInstance() {
+  public static PlaceholderHelper getInstance() {
     return sInstance.get();
   }
 
-  private PlaceholderManager() {}
+  private PlaceholderHelper() {}
 
-  public String queryKeyActivityName(String activityName) {
-    return mActivityKeyMap.get(activityName);
+  public String queryKeyActivity(String appliedActivityName) {
+    return mActivityKeyMap.get(appliedActivityName);
   }
 
-  public String queryKeyServiceName(String serviceName) {
-    return mServiceKeyMap.get(serviceName);
+  public String queryKeyService(String appliedServiceName) {
+    return mServiceKeyMap.get(appliedServiceName);
   }
 
-  public Class<? extends Activity> applyActivity(String keyActivityName) {
-    Class<? extends Activity> aClass = mActivityMap.get(keyActivityName);
-    if (aClass != null) {
-      return aClass;
+  public String applyActivity(String keyActivityName) {
+    String aClassName = mActivityMap.get(keyActivityName);
+    if (aClassName != null) {
+      return aClassName;
     }
 
     if (mActivityIndex == ACTIVITY_MAX) {
       throw new IndexOutOfBoundsException("activity max.");
     }
 
-    // noinspection unchecked
-    Class<? extends Activity> current = mActivityClasses[mActivityIndex];
+    String current = mActivityClasses[mActivityIndex].getName();
     mActivityMap.put(keyActivityName, current);
-    mActivityKeyMap.put(current.getName(), keyActivityName);
+    mActivityKeyMap.put(current, keyActivityName);
     mActivityIndex++;
     return current;
   }
 
-  public Class<? extends Service> applyService(String keyServiceName) {
-    Class<? extends Service> sClass = mServiceMap.get(keyServiceName);
+  public String applyService(String keyServiceName) {
+    String sClass = mServiceMap.get(keyServiceName);
     if (sClass != null) {
       return sClass;
     }
@@ -97,10 +93,9 @@ public class PlaceholderManager {
       throw new IndexOutOfBoundsException("activity max.");
     }
 
-    // noinspection unchecked
-    Class<? extends Service> current = mServiceClasses[mServiceIndex];
+    String current = mServiceClasses[mServiceIndex].getName();
     mServiceMap.put(keyServiceName, current);
-    mActivityKeyMap.put(current.getName(), keyServiceName);
+    mServiceKeyMap.put(current, keyServiceName);
     mServiceIndex++;
     return current;
   }

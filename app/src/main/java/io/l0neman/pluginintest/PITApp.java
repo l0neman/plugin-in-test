@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import io.l0neman.pluginlib.Core;
+import io.l0neman.pluginlib.support.PLLogger;
 
 public class PITApp extends Application {
 
@@ -11,12 +12,15 @@ public class PITApp extends Application {
 
   @Override protected void attachBaseContext(Context base) {
     super.attachBaseContext(base);
+    PLLogger.i(TAG, "attachBaseContext");
+
     Core.getInstance().initEnv(this);
   }
 
   @Override public void onCreate() {
-    super.onCreate();
+    PLLogger.i(TAG, "onCreate");
 
+    super.onCreate();
   }
 
 

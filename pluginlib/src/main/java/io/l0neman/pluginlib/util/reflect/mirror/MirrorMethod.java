@@ -1,8 +1,9 @@
 package io.l0neman.pluginlib.util.reflect.mirror;
 
+import androidx.collection.ArrayMap;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import io.l0neman.pluginlib.util.Reflect;
@@ -18,7 +19,7 @@ public class MirrorMethod<T> {
 
   private Object mObject;
   private Method mMethod;
-  private Map<String, Method> mOverloadMethodMap = new HashMap<>();
+  private Map<String, Method> mOverloadMethodMap = new ArrayMap<>();
 
   // for object method.
   public MirrorMethod(Object mObject, Method[] overloadMethod) {

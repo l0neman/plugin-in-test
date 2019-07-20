@@ -1,7 +1,5 @@
 package io.l0neman.pluginlib.hook.android.app;
 
-import android.app.Activity;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 
@@ -10,9 +8,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import io.l0neman.pluginlib.Core;
+import io.l0neman.pluginlib.client.placeholder.PlaceholderManager;
+import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.mirror.android.app.ActivityManagerNative;
-import io.l0neman.pluginlib.placeholder.PlaceholderManager;
 import io.l0neman.pluginlib.support.PLLogger;
+import io.l0neman.pluginlib.support.Process;
 import io.l0neman.pluginlib.util.Objects;
 import io.l0neman.pluginlib.util.Reflect;
 
@@ -24,9 +24,14 @@ public class ActivityManagerNativeHook {
   private static class ActivityManagerProxy implements InvocationHandler {
 
     private final Object mActivityManager;
+    private PlaceholderManager mPlaceholderManager;
 
     ActivityManagerProxy(Object mActivityManager) {
       this.mActivityManager = mActivityManager;
+
+      Core.sHook = false;
+      mPlaceholderManager = VContext.getInstance().getService(VContext.PLACEHOLDER);
+      Core.sHook = true;
     }
 
     @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -34,14 +39,14 @@ public class ActivityManagerNativeHook {
       PLLogger.d(TAG, "ActivityManager: " + methodName);
 
       switch (methodName) {
-        case "startActivity":
-          return handleStartActivity(method, args);
-        case "startService":
-          return handleStartService(method, args);
-        case "stopService":
-          return handleStopService(method, args);
-        case "bindService":
-          return handleBindService(method, args);
+      case "startActivity":
+        return handleStartActivity(method, args);
+      case "startService":
+        return handleStartService(method, args);
+      case "stopService":
+        return handleStopService(method, args);
+      case "bindService":
+        return handleBindService(method, args);
       }
 
       return method.invoke(mActivityManager, args);
@@ -61,14 +66,13 @@ public class ActivityManagerNativeHook {
       newIntent.putExtra("rawIntent", raw);
 
       String pluginActivityName = Objects.requireNonNull(raw.getComponent()).getClassName();
-      Class<? extends Activity> holderActivityClass = PlaceholderManager.getInstance()
-          .applyActivity(pluginActivityName);
+      String holderActivityClass = mPlaceholderManager.applyActivity(pluginActivityName);
 
-      PLLogger.i(TAG, "[startActivity] proxy: " + pluginActivityName + " => " + holderActivityClass.getName());
+      PLLogger.i(TAG, "[startActivity] proxy: " + pluginActivityName + " => " + holderActivityClass);
 
       newIntent.setComponent(new ComponentName(
           Core.getInstance().getHostContext().getPackageName(),
-          holderActivityClass.getName()
+          holderActivityClass
       ));
 
       args[i] = newIntent;
@@ -84,15 +88,14 @@ public class ActivityManagerNativeHook {
       Intent raw = (Intent) args[i];
 
       String pluginServiceName = Objects.requireNonNull(raw.getComponent()).getClassName();
-      Class<? extends Service> holderServiceClass = PlaceholderManager.getInstance()
-          .applyService(pluginServiceName);
+      String holderServiceClassName = mPlaceholderManager.applyService(pluginServiceName);
 
-      PLLogger.i(TAG, "[startService] proxy: " + pluginServiceName + " => " + holderServiceClass.getName());
+      PLLogger.i(TAG, "[startService] proxy: " + pluginServiceName + " => " + holderServiceClassName);
 
       Intent newIntent = new Intent();
       newIntent.setComponent(new ComponentName(
           Core.getInstance().getHostContext().getPackageName(),
-          holderServiceClass.getName()
+          holderServiceClassName
       ));
 
       args[i] = newIntent;
@@ -109,15 +112,13 @@ public class ActivityManagerNativeHook {
       Intent raw = (Intent) args[i];
 
       String pluginServiceName = Objects.requireNonNull(raw.getComponent()).getClassName();
-      Class<? extends Service> holderServiceClass = PlaceholderManager.getInstance()
-          .applyService(pluginServiceName);
+      String holderServiceClassName = mPlaceholderManager.applyService(pluginServiceName);
 
-      PLLogger.i(TAG, "[stopService] proxy: " + pluginServiceName + " => " + holderServiceClass.getName());
+      PLLogger.i(TAG, "[stopService] proxy: " + pluginServiceName + " => " + holderServiceClassName);
 
       Intent newIntent = new Intent();
       newIntent.setComponent(new ComponentName(
-          Core.getInstance().getHostContext().getPackageName(),
-          holderServiceClass.getName()
+          Core.getInstance().getHostContext().getPackageName(), holderServiceClassName
       ));
 
       args[i] = newIntent;
@@ -134,15 +135,13 @@ public class ActivityManagerNativeHook {
       Intent raw = (Intent) args[i];
 
       String pluginServiceName = Objects.requireNonNull(raw.getComponent()).getClassName();
-      Class<? extends Service> holderServiceClass = PlaceholderManager.getInstance()
-          .applyService(pluginServiceName);
+      String holderServiceClassName = mPlaceholderManager.applyService(pluginServiceName);
 
-      PLLogger.i(TAG, "[bindService] proxy: " + pluginServiceName + " => " + holderServiceClass.getName());
+      PLLogger.i(TAG, "[bindService] proxy: " + pluginServiceName + " => " + holderServiceClassName);
 
       Intent newIntent = new Intent();
       newIntent.setComponent(new ComponentName(
-          Core.getInstance().getHostContext().getPackageName(),
-          holderServiceClass.getName()
+          Core.getInstance().getHostContext().getPackageName(), holderServiceClassName
       ));
 
       args[i] = newIntent;
@@ -153,7 +152,6 @@ public class ActivityManagerNativeHook {
 
   public static void hook() {
     try {
-      ActivityManagerNative.mirror(ActivityManagerNative.class);
       Object mInstance = ActivityManagerNative.gDefault.mInstance.get();
 
       Object newAM = Proxy.newProxyInstance(

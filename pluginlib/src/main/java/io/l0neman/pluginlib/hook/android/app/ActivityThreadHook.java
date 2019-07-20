@@ -5,9 +5,12 @@ import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.Message;
 
+import io.l0neman.pluginlib.Core;
+import io.l0neman.pluginlib.client.placeholder.PlaceholderManager;
+import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.mirror.android.app.ActivityThread;
-import io.l0neman.pluginlib.placeholder.PlaceholderManager;
 import io.l0neman.pluginlib.support.PLLogger;
+import io.l0neman.pluginlib.support.Process;
 import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorClass;
 
@@ -22,24 +25,26 @@ public class ActivityThreadHook {
     private static final class HCallbackProxy implements Handler.Callback {
 
       private final Handler mH;
+      private PlaceholderManager mPlaceholderManager;
 
       public HCallbackProxy(Handler mH) {
         this.mH = mH;
+        mPlaceholderManager = VContext.getInstance().getService(VContext.PLACEHOLDER);
       }
 
       @Override public boolean handleMessage(Message msg) {
 
         switch (msg.what) {
-          case ActivityThread.H.LAUNCH_ACTIVITY:
-            PLLogger.d(TAG, "LAUNCH_ACTIVITY: " + msg.obj);
+        case ActivityThread.H.LAUNCH_ACTIVITY:
+          PLLogger.d(TAG, "LAUNCH_ACTIVITY: " + msg.obj);
 
-            handleLaunchActivity(msg);
-            break;
-          case ActivityThread.H.CREATE_SERVICE:
-            PLLogger.d(TAG, "CREATE_SERVICE: " + msg.obj);
+          handleLaunchActivity(msg);
+          break;
+        case ActivityThread.H.CREATE_SERVICE:
+          PLLogger.d(TAG, "CREATE_SERVICE: " + msg.obj);
 
-            handleCreateService(msg);
-            break;
+          handleCreateService(msg);
+          break;
         }
 
         mH.handleMessage(msg);
@@ -62,7 +67,7 @@ public class ActivityThreadHook {
       private void handleCreateService(Message msg) {
         try {
           ServiceInfo si = Reflect.with(msg.obj).injector().field("info").get();
-          String realName = PlaceholderManager.getInstance().queryKeyActivityName(si.name);
+          String realName = mPlaceholderManager.queryKeyService(si.name);
           PLLogger.i(TAG, "revert: " + si.name + " => " + realName);
 
           si.name = realName;
@@ -75,10 +80,9 @@ public class ActivityThreadHook {
 
     public static void hook() {
       try {
-        ActivityThread.mirror(ActivityThread.class);
         Object sCurrentActivityThread = ActivityThread.sCurrentActivityThread.get();
 
-        ActivityThread activityThread = MirrorClass.mirror(sCurrentActivityThread,
+        ActivityThread activityThread = MirrorClass.map(sCurrentActivityThread,
             ActivityThread.class);
 
         Handler mH = activityThread.mH.get();

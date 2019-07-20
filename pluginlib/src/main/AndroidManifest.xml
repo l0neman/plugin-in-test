@@ -6,34 +6,55 @@
         <service
             android:name=".test.TestService"
             android:enabled="true"
-            android:exported="false"></service>
-
-        <provider
-            android:name=".support.server.ServiceManagerProvider"
-            android:authorities="io.l0neman.pluginlib.smprovider"
             android:exported="false" />
 
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity0" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity1" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity2" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity3" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity4" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity5" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity6" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity7" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity8" />
-        <activity android:name=".placeholder.ActivityPlaceholders$Activity9" />
+        <provider
+            android:name=".server.manager.ServiceManagerProvider"
+            android:authorities="io.l0neman.pluginlib.smprovider"
+            android:exported="false"
+            android:process=":s" />
 
-        <service android:name=".placeholder.ServicePlaceholders$Service0" />
-        <service android:name=".placeholder.ServicePlaceholders$Service1" />
-        <service android:name=".placeholder.ServicePlaceholders$Service2" />
-        <service android:name=".placeholder.ServicePlaceholders$Service3" />
-        <service android:name=".placeholder.ServicePlaceholders$Service4" />
-        <service android:name=".placeholder.ServicePlaceholders$Service5" />
-        <service android:name=".placeholder.ServicePlaceholders$Service6" />
-        <service android:name=".placeholder.ServicePlaceholders$Service7" />
-        <service android:name=".placeholder.ServicePlaceholders$Service8" />
-        <service android:name=".placeholder.ServicePlaceholders$Service9" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity0"
+            android:process=":c0" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity1"
+            android:process=":c1" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity2"
+            android:process=":c2" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity3"
+            android:process=":c3" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity4"
+            android:process=":c4" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity5"
+            android:process=":c5" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity6"
+            android:process=":c6" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity7"
+            android:process=":c7" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity8"
+            android:process=":c8" />
+        <activity
+            android:name=".support.placeholder.ActivityPlaceholders$Activity9"
+            android:process=":c9" />
+
+        <service android:name=".support.placeholder.ServicePlaceholders$Service0" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service1" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service2" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service3" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service4" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service5" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service6" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service7" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service8" />
+        <service android:name=".support.placeholder.ServicePlaceholders$Service9" />
     </application>
 
 </manifest>
