@@ -56,7 +56,7 @@ public class MirrorField<T> {
    * @param value new value.
    * @throws MirrorException otherwise.
    */
-  public void set(Object value) throws MirrorException {
+  public void set(T value) throws MirrorException {
     try {
       Reflect.with(mField).targetObject(mObject).set(value);
     } catch (Reflect.ReflectException e) {

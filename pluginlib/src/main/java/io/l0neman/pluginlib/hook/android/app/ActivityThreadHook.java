@@ -20,7 +20,7 @@ public class ActivityThreadHook {
 
   public static class H {
 
-    private static final String TAG = ActivityThreadHook.TAG + ".H";
+    private static final String TAG = ActivityThreadHook.TAG + "$H";
 
     private static final class HCallbackProxy implements Handler.Callback {
 
@@ -33,6 +33,7 @@ public class ActivityThreadHook {
       }
 
       @Override public boolean handleMessage(Message msg) {
+        // PLLogger.d(TAG, "msg.what: " + msg.what);
 
         switch (msg.what) {
         case ActivityThread.H.LAUNCH_ACTIVITY:

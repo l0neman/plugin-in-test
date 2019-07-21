@@ -12,7 +12,6 @@ import io.l0neman.pluginlib.client.placeholder.PlaceholderManager;
 import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.mirror.android.app.ActivityManagerNative;
 import io.l0neman.pluginlib.support.PLLogger;
-import io.l0neman.pluginlib.support.Process;
 import io.l0neman.pluginlib.util.Objects;
 import io.l0neman.pluginlib.util.Reflect;
 
@@ -29,9 +28,7 @@ public class ActivityManagerNativeHook {
     ActivityManagerProxy(Object mActivityManager) {
       this.mActivityManager = mActivityManager;
 
-      Core.sHook = false;
       mPlaceholderManager = VContext.getInstance().getService(VContext.PLACEHOLDER);
-      Core.sHook = true;
     }
 
     @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

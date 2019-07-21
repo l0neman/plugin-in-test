@@ -9,5 +9,5 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
  */
 @TargetMirrorClassName("android.util.Singleton")
 public class Singleton extends MirrorClass {
-  public MirrorField mInstance;
+  public MirrorField<Object> mInstance;
 }

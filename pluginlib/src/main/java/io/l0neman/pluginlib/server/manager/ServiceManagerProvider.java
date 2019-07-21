@@ -22,13 +22,7 @@ public final class ServiceManagerProvider extends ContentProvider {
   public static final String KEY_BINDER = "binder";
 
   @Override public boolean onCreate() {
-
-    try {
-      ServiceManager.getInstance().addService(getContext(), VContext.PLACEHOLDER, new PlaceholderManagerService());
-    } catch (RemoteException e) {
-      PLLogger.e(TAG, "add service", e);
-    }
-
+    mServiceManager.addService(VContext.PLACEHOLDER, new PlaceholderManagerService());
     return true;
   }
 

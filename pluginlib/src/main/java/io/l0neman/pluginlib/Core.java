@@ -5,11 +5,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.util.Map;
 
 import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.hook.android.app.ActivityManagerNativeHook;
 import io.l0neman.pluginlib.hook.android.app.ActivityThreadHook;
 import io.l0neman.pluginlib.mirror.android.app.ActivityThread;
+import io.l0neman.pluginlib.mirror.android.app.LoadedApk;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.support.Process;
 import io.l0neman.pluginlib.util.AppUtils;
@@ -33,8 +40,6 @@ public final class Core {
   private Application mHostContext;
   private ActivityThread mMainThread;
 
-  public static volatile boolean sHook = true;
-
   public void initEnv(Application context) {
     mHostContext = context;
     VContext.getInstance().init(context);
@@ -45,9 +50,7 @@ public final class Core {
       throw new RuntimeException(e);
     }
 
-    if (Process.isMainProcess()) {
-      PLLogger.d(TAG, "hook kkkkkkkkkk");
-
+    if (!Process.isServerProcess()) {
       ActivityManagerNativeHook.hook();
       ActivityThreadHook.H.hook();
     }
@@ -62,14 +65,52 @@ public final class Core {
   private void detectProcess() {
     if (Process.isMainProcess()) {
       PLLogger.i(TAG, "in main process.");
-    } else {
+      return;
+    }
 
-      preloadAPK(getHostContext(), SPUtils.get(getHostContext(), "apkInfo")
-          .getString("tApkPath", null));
+    final String tApkPath = SPUtils.get(getHostContext(), "apkInfo")
+        .getString("tApkPath", null);
 
-      if (Process.isAppProcess()) {
-        PLLogger.i(TAG, "in app process.");
+    if (Process.isAppProcess()) {
+      PLLogger.i(TAG, "in app process.");
+
+      prepareResources(tApkPath);
+    }
+
+    preloadAPK(getHostContext(), tApkPath);
+  }
+
+  private void prepareResources(String apkPath) {
+    try {
+      final Map<String, WeakReference> mPackages = mMainThread.mPackages.get();
+      final WeakReference loadedApkRef = mPackages.get(getHostContext().getPackageName());
+      final Object loadedApk = loadedApkRef.get();
+      LoadedApk mirrorLoadedApk = MirrorClass.map(loadedApk, LoadedApk.class);
+
+      AssetManager assetManager = Reflect.with(AssetManager.class).creator().create();
+      Reflect.with(AssetManager.class).invoker()
+          .method("addAssetPath")
+          .targetObject(assetManager)
+          .paramsType(String.class)
+          .invoke(apkPath);
+
+      try {
+        final InputStream open = assetManager.open("xiconhelper.apk");
+        PLLogger.d(TAG, "open xiconhelper.apk ok.");
+        open.close();
+      }catch (Exception e){
+        PLLogger.w(TAG, "open xiconhelper.apk", e);
       }
+
+
+      final Resources oldResources = getHostContext().getResources();
+      Resources resources = new Resources(assetManager, oldResources.getDisplayMetrics(),
+          oldResources.getConfiguration());
+      mirrorLoadedApk.mResources.set(resources);
+
+      PLLogger.d(TAG, "add asset path: " + apkPath);
+    } catch (Exception e) {
+      PLLogger.w(TAG, "prepareResources", e);
     }
   }
 
@@ -90,10 +131,29 @@ public final class Core {
     } catch (Exception e) {
       PLLogger.w(TAG, "insert code: " + e);
     }
+
+    try {
+      final String application = AppUtils.getInstance().findApplication(mApkPath);
+      PLLogger.d(TAG, "find application: " + application);
+      Application app = Reflect.with(application).creator().create();
+      try {
+        Reflect.with(app).invoker().method("attachBaseContext")
+            .paramsType(Context.class)
+            .invoke(getHostContext());
+      } catch (Exception e) {
+        PLLogger.w(TAG, e);
+      }
+
+      app.onCreate();
+
+    } catch (Exception e) {
+      PLLogger.w(TAG, "call Application", e);
+    }
   }
 
   public void launchAPK(Context context) {
     final String mainActivityName;
+
     try {
       mainActivityName = AppUtils.getInstance().findMainActivity(mApkPath);
 
