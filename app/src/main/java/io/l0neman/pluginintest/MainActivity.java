@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     EasyAsync.get(new EasyAsync.Executor<File>() {
       @Override public File run() {
         try {
-          final InputStream is = getAssets().open("target/xicon.apk");
+          final InputStream is = getAssets().open("target/plusmany.apk");
 
           File targetAPK = new File(AEasyDir.getDir(MainActivity.this, "target"), "target.apk");
 

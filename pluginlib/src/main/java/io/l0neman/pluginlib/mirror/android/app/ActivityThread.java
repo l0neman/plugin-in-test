@@ -11,7 +11,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.MirrorField;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
 
 @TargetMirrorClassName("android.app.ActivityThread")
-public class ActivityThread extends MirrorClass {
+public class ActivityThread extends MirrorClass<Object> {
 
   static {
     mapQuiet(ActivityThread.class);

@@ -8,7 +8,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
  * Created by l0neman on 2019/07/07.
  */
 @TargetMirrorClassName("android.app.ActivityManagerNative")
-public class ActivityManagerNative extends MirrorClass {
+public class ActivityManagerNative extends MirrorClass<Object> {
 
   static {
     mapQuiet(ActivityManagerNative.class);

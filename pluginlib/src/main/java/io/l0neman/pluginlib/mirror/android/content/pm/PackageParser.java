@@ -11,7 +11,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterTypes;
  * Created by l0neman on 2019/07/07.
  */
 @TargetMirrorClassName(PackageParser.MIRROR_CLASS)
-public class PackageParser extends MirrorClass {
+public class PackageParser extends MirrorClass<Object> {
 
   public static final String MIRROR_CLASS = "android.content.pm.PackageParser";
 
