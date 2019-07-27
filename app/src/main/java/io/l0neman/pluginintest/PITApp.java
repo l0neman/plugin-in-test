@@ -19,9 +19,9 @@ public class PITApp extends Application {
 
   @Override public void onCreate() {
     PLLogger.i(TAG, "onCreate");
-    super.onCreate();
 
-    Core.getInstance().preload();
+    super.onCreate();
   }
+
 
 }

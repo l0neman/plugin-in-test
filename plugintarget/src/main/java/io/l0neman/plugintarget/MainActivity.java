@@ -37,9 +37,7 @@ public class MainActivity extends BaseUtilsActivity {
     super.onCreate(savedInstanceState);
     TALogger.d(TAG, "onCreate");
 
-    final View inflate = View.inflate(this, R.layout.activity_main, null);
-    TALogger.d(TAG, "content view: " + inflate);
-    setContentView(inflate);
+    setContentView(getContentView());
     registerReceiver();
   }
 

@@ -10,6 +10,6 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
  * Created by l0neman on 2019/07/21.
  */
 @TargetMirrorClassName("android.app.LoadedApk")
-public class LoadedApk extends MirrorClass<Object> {
+public class LoadedApk extends MirrorClass {
   public MirrorField<Resources> mResources;
 }

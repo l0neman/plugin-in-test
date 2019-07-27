@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.l0neman.pluginlib.util.Reflect;
-import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClass;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
 import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
@@ -22,10 +21,10 @@ import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorClassInfo;
  * <p>
  * Target mirror class.
  */
-public class MirrorClass<M> {
+public class MirrorClass {
   private static Map<Class<?>, MirrorClassInfo> sReflectClassesInfoCache = new ConcurrentHashMap<>();
 
-  M mTargetMirrorObject;
+  Object mTargetMirrorObject;
 
   // empty args placeholder.
   private static Class<?>[] ARGS_PLACEHOLDER = new Class[0];
@@ -37,7 +36,7 @@ public class MirrorClass<M> {
     public InvokeRuntimeException(Throwable cause) { super(cause); }
   }
 
-  public M getTargetMirrorObject() {
+  public Object getTargetMirrorObject() {
     return mTargetMirrorObject;
   }
 
@@ -81,7 +80,7 @@ public class MirrorClass<M> {
 
     String methodSignature = MethodHelper.getSignature("c", parameterTypes);
 
-    Class<?> targetMirrorClass;
+    Class<?> targetMirrorClass = null;
     try {
       targetMirrorClass = isMapped ? reflectClassInfo.getTargetMirrorClass() : getTargetMirrorClass(mirrorClass);
     } catch (MirrorException e) {
@@ -252,18 +251,12 @@ public class MirrorClass<M> {
 
     final TargetMirrorClassName mirrorClassName = mirrorClass.getAnnotation(TargetMirrorClassName.class);
 
-    if (mirrorClassName != null) {
-      return Reflect.with(mirrorClassName.value()).getClazz();
+    if (mirrorClassName == null) {
+      throw new MirrorException("not get mirror class name, please add annotation. for mirror class: " +
+          mirrorClass.getSimpleName());
     }
 
-    final TargetMirrorClass targetMirrorClass = mirrorClass.getAnnotation(TargetMirrorClass.class);
-
-    if (targetMirrorClass != null) {
-      return targetMirrorClass.value();
-    }
-
-    throw new MirrorException("not get mirror class name, please add annotation. for mirror class: " +
-        mirrorClass.getSimpleName());
+    return Reflect.with(mirrorClassName.value()).getClazz();
   }
 
   // mirror utils:
@@ -429,12 +422,9 @@ public class MirrorClass<M> {
         // for MirrorClass.
         if (MirrorClass.class.isAssignableFrom(fieldType)) {
 
-          final Object targetMirrorField = isStatic && forClass ? null :
-              Reflect.with(targetMirrorClass).injector().field(field.getName())
-                  .targetObject(targetMirrorObject).get();
-
           // noinspection unchecked
-          final MirrorClass mapClass = MirrorClass.map(targetMirrorField,
+          final MirrorClass mapClass = MirrorClass.map(
+              Reflect.with(targetMirrorClass).injector().field(field.getName()).get(),
               (Class<? extends MirrorClass>) fieldType);
 
           if (isStatic && forClass) {
