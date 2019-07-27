@@ -5,18 +5,19 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Map;
 
 import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.hook.android.app.ActivityManagerNativeHook;
 import io.l0neman.pluginlib.hook.android.app.ActivityThreadHook;
 import io.l0neman.pluginlib.mirror.android.app.ActivityThread;
+import io.l0neman.pluginlib.mirror.android.app.ContextImpl;
 import io.l0neman.pluginlib.mirror.android.app.LoadedApk;
+import io.l0neman.pluginlib.mirror.android.content.res.AssetManager;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.support.Process;
 import io.l0neman.pluginlib.util.AppUtils;
@@ -40,6 +41,14 @@ public final class Core {
   private Application mHostContext;
   private ActivityThread mMainThread;
 
+  public ActivityThread currentActivityThread() {
+    return mMainThread;
+  }
+
+  public Context getHostContext() {
+    return mHostContext;
+  }
+
   public void initEnv(Application context) {
     mHostContext = context;
     VContext.getInstance().init(context);
@@ -49,73 +58,6 @@ public final class Core {
     } catch (MirrorException e) {
       throw new RuntimeException(e);
     }
-
-    if (!Process.isServerProcess()) {
-      ActivityManagerNativeHook.hook();
-      ActivityThreadHook.H.hook();
-    }
-
-    detectProcess();
-  }
-
-  public ActivityThread currentActivityThread() {
-    return mMainThread;
-  }
-
-  private void detectProcess() {
-    if (Process.isMainProcess()) {
-      PLLogger.i(TAG, "in main process.");
-      return;
-    }
-
-    final String tApkPath = SPUtils.get(getHostContext(), "apkInfo")
-        .getString("tApkPath", null);
-
-    if (Process.isAppProcess()) {
-      PLLogger.i(TAG, "in app process.");
-
-      prepareResources(tApkPath);
-    }
-
-    preloadAPK(getHostContext(), tApkPath);
-  }
-
-  private void prepareResources(String apkPath) {
-    try {
-      final Map<String, WeakReference> mPackages = mMainThread.mPackages.get();
-      final WeakReference loadedApkRef = mPackages.get(getHostContext().getPackageName());
-      final Object loadedApk = loadedApkRef.get();
-      LoadedApk mirrorLoadedApk = MirrorClass.map(loadedApk, LoadedApk.class);
-
-      AssetManager assetManager = Reflect.with(AssetManager.class).creator().create();
-      Reflect.with(AssetManager.class).invoker()
-          .method("addAssetPath")
-          .targetObject(assetManager)
-          .paramsType(String.class)
-          .invoke(apkPath);
-
-      try {
-        final InputStream open = assetManager.open("xiconhelper.apk");
-        PLLogger.d(TAG, "open xiconhelper.apk ok.");
-        open.close();
-      }catch (Exception e){
-        PLLogger.w(TAG, "open xiconhelper.apk", e);
-      }
-
-
-      final Resources oldResources = getHostContext().getResources();
-      Resources resources = new Resources(assetManager, oldResources.getDisplayMetrics(),
-          oldResources.getConfiguration());
-      mirrorLoadedApk.mResources.set(resources);
-
-      PLLogger.d(TAG, "add asset path: " + apkPath);
-    } catch (Exception e) {
-      PLLogger.w(TAG, "prepareResources", e);
-    }
-  }
-
-  public Context getHostContext() {
-    return mHostContext;
   }
 
   public void preloadAPK(Context context, String apkPath) {
@@ -175,6 +117,72 @@ public final class Core {
       }
     } catch (Exception e) {
       PLLogger.w(TAG, "launchTargetActivity", e);
+    }
+  }
+
+  public void preload() {
+    if (!Process.isServerProcess()) {
+      ActivityManagerNativeHook.hook();
+      ActivityThreadHook.H.hook();
+    }
+
+    detectProcess();
+  }
+
+  private void detectProcess() {
+    if (Process.isMainProcess()) {
+      PLLogger.i(TAG, "in main process.");
+      return;
+    }
+
+    final String tApkPath = SPUtils.get(getHostContext(), "apkInfo")
+        .getString("tApkPath", null);
+
+    if (Process.isAppProcess()) {
+      PLLogger.i(TAG, "in app process.");
+
+    }
+
+    prepareResources(tApkPath);
+    preloadAPK(getHostContext(), tApkPath);
+  }
+
+  private void prepareResources(String apkPath) {
+    try {
+      final Map<String, WeakReference> mPackages = mMainThread.mPackages.get();
+      final WeakReference loadedApkRef = mPackages.get(getHostContext().getPackageName());
+
+      PLLogger.d(TAG, "loaded apk: " + Arrays.toString(mPackages.keySet().toArray()));
+
+      final Object loadedApk = loadedApkRef.get();
+      LoadedApk mirrorLoadedApk = MirrorClass.map(loadedApk, LoadedApk.class);
+
+      AssetManager assetManager = new AssetManager();
+      assetManager.addAssetPath(apkPath);
+
+//      try {
+//        final InputStream open = assetManager.open("xiconhelper.apk");
+//        PLLogger.d(TAG, "open xiconhelper.apk ok.");
+//        open.close();
+//      }catch (Exception e){
+//        PLLogger.w(TAG, "open xiconhelper.apk", e);
+//      }
+
+      final Resources oldResources = getHostContext().getResources();
+      Resources resources = new Resources(assetManager.getTargetMirrorObject(), oldResources.getDisplayMetrics(),
+          oldResources.getConfiguration());
+
+      Object contextImpl = Reflect.with(getHostContext()).injector()
+          .field("mBase")
+          .get();
+
+      final ContextImpl mBase = MirrorClass.map(contextImpl, ContextImpl.class);
+      mBase.mPackageInfo.mResources.set(resources);
+      mirrorLoadedApk.mResources.set(resources);
+
+      PLLogger.d(TAG, "add asset path: " + apkPath);
+    } catch (Exception e) {
+      PLLogger.w(TAG, "prepareResources", e);
     }
   }
 }
