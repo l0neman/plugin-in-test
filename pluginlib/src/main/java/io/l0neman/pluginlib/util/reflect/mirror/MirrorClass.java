@@ -21,6 +21,8 @@ import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorClassInfo;
  * Created by l0neman on 2019/07/19.
  * <p>
  * Target mirror class.
+ *
+ * todo 修改构造方式：使每个线程可以复用一个实例
  */
 public class MirrorClass<M> {
   private static Map<Class<?>, MirrorClassInfo> sReflectClassesInfoCache = new ConcurrentHashMap<>();
