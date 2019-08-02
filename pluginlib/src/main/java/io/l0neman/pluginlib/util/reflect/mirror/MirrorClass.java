@@ -22,9 +22,12 @@ import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorClassInfo;
  * <p>
  * Target mirror class.
  *
- * todo 修改构造方式：使每个线程可以复用一个实例
+ * todo 修改构造方式：使每个线程可以复用一个实例，使用 ThreadLocal 进行优化，
+ * todo 使用 setObject 更改目标作用对象。
  */
 public class MirrorClass<M> {
+
+  // TODO: 8/3/2019 可以优化掉。
   private static Map<Class<?>, MirrorClassInfo> sReflectClassesInfoCache = new ConcurrentHashMap<>();
 
   M mTargetMirrorObject;
