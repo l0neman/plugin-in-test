@@ -434,9 +434,8 @@ public class MirrorClass<M> {
         // for MirrorClass.
         if (MirrorClass.class.isAssignableFrom(fieldType)) {
 
-          final Object targetMirrorField = isStatic && forClass ? null :
-              Reflect.with(targetMirrorClass).injector().field(field.getName())
-                  .targetObject(targetMirrorObject).get();
+          final Object targetMirrorField = Reflect.with(targetMirrorClass).injector()
+              .field(field.getName()).targetObject(targetMirrorObject).get();
 
           // noinspection unchecked
           final MirrorClass mapClass = MirrorClass.map(targetMirrorField,
