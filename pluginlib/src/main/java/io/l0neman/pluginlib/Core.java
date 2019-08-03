@@ -1,15 +1,19 @@
 package io.l0neman.pluginlib;
 
+import android.accessibilityservice.AccessibilityService;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
+import android.os.Parcel;
+import android.view.accessibility.AccessibilityEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Random;
 
 import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.hook.android.app.ActivityManagerNativeHook;
@@ -140,7 +144,6 @@ public final class Core {
 
     if (Process.isAppProcess()) {
       PLLogger.i(TAG, "in app process.");
-
     }
 
     prepareResources(tApkPath);
@@ -175,10 +178,12 @@ public final class Core {
       Object contextImpl = Reflect.with(getHostContext()).injector()
           .field("mBase")
           .get();
-
       final ContextImpl mBase = MirrorClass.map(contextImpl, ContextImpl.class);
       mBase.mPackageInfo.mResources.set(resources);
       mirrorLoadedApk.mResources.set(resources);
+
+      PLLogger.d("res1", "" + mBase.mPackageInfo.mResources.get());
+      PLLogger.d("res2", "" + mirrorLoadedApk.mResources.get());
 
       PLLogger.d(TAG, "add asset path: " + apkPath);
     } catch (Exception e) {
