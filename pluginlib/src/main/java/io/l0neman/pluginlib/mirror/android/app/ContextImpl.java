@@ -11,6 +11,8 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
  */
 @TargetMirrorClassName("android.app.ContextImpl")
 public class ContextImpl extends MirrorClass<Object> {
+  public static final ContextImpl REUSE = ContextImpl.mapQuiet(ContextImpl.class);
+
   public MirrorField<Resources> mResources;
 
   public LoadedApk mPackageInfo;

@@ -13,9 +13,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
 @TargetMirrorClassName("android.app.ActivityThread")
 public class ActivityThread extends MirrorClass<Object> {
 
-  static {
-    mapQuiet(ActivityThread.class);
-  }
+  public static final ActivityThread REUSE = ActivityThread.mapQuiet(ActivityThread.class);
 
   public static MirrorField sCurrentActivityThread;
   public MirrorField<Handler> mH;

@@ -3,18 +3,21 @@ package io.l0neman.pluginlib.util.reflect.mirror;
 import androidx.collection.ArrayMap;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
 
 import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
-import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
+import io.l0neman.pluginlib.util.reflect.mirror.util.ActionChecker;
+import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorMethodHelper;
 
 /**
  * Created by l0neman on 2019/07/06.
  * <p>
- * The mapping of the constructor of the target mirror classe.
+ * The mapping of the constructor of the target mirror class.
  */
+@SuppressWarnings("JavadocReference")
 public class MirrorMethod<T> {
 
   private Object mObject;
@@ -38,7 +41,7 @@ public class MirrorMethod<T> {
     }
 
     for (Method method : overloadMethod) {
-      mOverloadMethodMap.put(MethodHelper.getSignature("o", method.getParameterTypes()), method);
+      mOverloadMethodMap.put(MirrorMethodHelper.getSignature("o", method.getParameterTypes()), method);
     }
   }
 
@@ -47,8 +50,9 @@ public class MirrorMethod<T> {
    *
    * @param mObject target call object.
    */
-  public void setObject(Object mObject) {
+  public MirrorMethod<T> setObject(Object mObject) {
     this.mObject = mObject;
+    return this;
   }
 
   /**
@@ -58,12 +62,15 @@ public class MirrorMethod<T> {
    *
    * @param args method parameters.
    * @return method return value.
+   *
    * @throws MirrorException otherwise.
    */
   public T invoke(Object... args) throws MirrorException {
     if (mMethod == null) {
       return invokeOverload((Class[]) null, args);
     }
+
+    ActionChecker.checkMethod(mMethod, mObject);
 
     try {
       return Reflect.with(mMethod).targetObject(mObject).invoke(args);
@@ -76,7 +83,7 @@ public class MirrorMethod<T> {
    * @see #invokeOverload(Class[], Object...)
    */
   public T invokeOverload(String[] parameterTypes, Object... args) throws MirrorException {
-    return invokeOverload(MethodHelper.getParameterTypes(parameterTypes), args);
+    return invokeOverload(MirrorMethodHelper.getParameterTypes(parameterTypes), args);
   }
 
   /**
@@ -87,6 +94,7 @@ public class MirrorMethod<T> {
    * @param parameterTypes method parameter type names.
    * @param args           method parameters.
    * @return method return value.
+   *
    * @throws MirrorException otherwise.
    */
   public T invokeOverload(Class[] parameterTypes, Object... args) throws MirrorException {
@@ -94,10 +102,12 @@ public class MirrorMethod<T> {
       parameterTypes = new Class[0];
     }
 
-    Method method = mOverloadMethodMap.get(MethodHelper.getSignature("o", parameterTypes));
+    Method method = mOverloadMethodMap.get(MirrorMethodHelper.getSignature("o", parameterTypes));
     if (method == null) {
       throw new MirrorException("not found method: " + Arrays.toString(parameterTypes));
     }
+
+    ActionChecker.checkMethod(method, mObject);
 
     try {
       return Reflect.with(method).targetObject(mObject).invoke(args);
@@ -105,4 +115,5 @@ public class MirrorMethod<T> {
       throw new MirrorException(e);
     }
   }
+
 }

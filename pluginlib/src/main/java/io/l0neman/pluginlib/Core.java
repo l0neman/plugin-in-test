@@ -158,7 +158,7 @@ public final class Core {
       PLLogger.d(TAG, "loaded apk: " + Arrays.toString(mPackages.keySet().toArray()));
 
       final Object loadedApk = loadedApkRef.get();
-      LoadedApk mirrorLoadedApk = MirrorClass.map(loadedApk, LoadedApk.class);
+      LoadedApk mirrorLoadedApk = LoadedApk.REUSE.attach(loadedApk);
 
       AssetManager assetManager = new AssetManager();
       assetManager.addAssetPath(apkPath);
@@ -175,10 +175,12 @@ public final class Core {
       Resources resources = new Resources(assetManager.getTargetMirrorObject(), oldResources.getDisplayMetrics(),
           oldResources.getConfiguration());
 
-      Object contextImpl = Reflect.with(getHostContext()).injector()
+      final Object mTBase = Reflect.with(getHostContext()).injector()
           .field("mBase")
           .get();
-      final ContextImpl mBase = MirrorClass.map(contextImpl, ContextImpl.class);
+
+      final ContextImpl mBase = ContextImpl.REUSE.attach(mTBase);
+
       mBase.mPackageInfo.mResources.set(resources);
       mirrorLoadedApk.mResources.set(resources);
 

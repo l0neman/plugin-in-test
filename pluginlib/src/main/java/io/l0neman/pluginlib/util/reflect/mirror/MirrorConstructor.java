@@ -8,13 +8,14 @@ import java.util.Map;
 
 import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
-import io.l0neman.pluginlib.util.reflect.mirror.util.MethodHelper;
+import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorMethodHelper;
 
 /**
  * Created by l0neman on 2019/07/18.
  * <p>
  * The mapping of the constructor of the target mirror class.
  */
+@SuppressWarnings("JavadocReference")
 public class MirrorConstructor<T> {
   private Constructor mConstructor;
   // for overload constructors.
@@ -26,7 +27,7 @@ public class MirrorConstructor<T> {
     }
 
     for (Constructor constructor : overloadConstructor) {
-      mOverloadConstructorMap.put(MethodHelper.getSignature("c",
+      mOverloadConstructorMap.put(MirrorMethodHelper.getSignature("c",
           constructor.getParameterTypes()), constructor);
     }
   }
@@ -53,10 +54,12 @@ public class MirrorConstructor<T> {
   }
 
   /**
+   * Use a string to represent the parameter types.
+   *
    * @see #newInstanceOverload(Class[], Object...)
    */
   public T newInstanceOverload(String[] parameterTypes, Object... args) throws MirrorException {
-    return newInstanceOverload(MethodHelper.getParameterTypes(parameterTypes), args);
+    return newInstanceOverload(MirrorMethodHelper.getParameterTypes(parameterTypes), args);
   }
 
   /**
@@ -74,7 +77,7 @@ public class MirrorConstructor<T> {
       parameterTypes = new Class[0];
     }
 
-    Constructor constructor = mOverloadConstructorMap.get(MethodHelper.getSignature("c", parameterTypes));
+    Constructor constructor = mOverloadConstructorMap.get(MirrorMethodHelper.getSignature("c", parameterTypes));
 
     if (constructor == null) {
       throw new MirrorException("not found method: " + Arrays.toString(parameterTypes));

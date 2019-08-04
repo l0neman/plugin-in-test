@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 
 import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
+import io.l0neman.pluginlib.util.reflect.mirror.util.ActionChecker;
 
 /**
  * Created by l0neman on 2019/07/06.
@@ -32,8 +33,9 @@ public class MirrorField<T> {
    *
    * @param mObject target call object.
    */
-  public void setObject(Object mObject) {
+  public MirrorField<T> setObject(Object mObject) {
     this.mObject = mObject;
+    return this;
   }
 
   /**
@@ -43,6 +45,8 @@ public class MirrorField<T> {
    * @throws MirrorException otherwise.
    */
   public T get() throws MirrorException {
+    ActionChecker.checkField(mField, mObject);
+
     try {
       return Reflect.with(mField).targetObject(mObject).get();
     } catch (Reflect.ReflectException e) {
@@ -57,6 +61,8 @@ public class MirrorField<T> {
    * @throws MirrorException otherwise.
    */
   public void set(T value) throws MirrorException {
+    ActionChecker.checkField(mField, mObject);
+
     try {
       Reflect.with(mField).targetObject(mObject).set(value);
     } catch (Reflect.ReflectException e) {

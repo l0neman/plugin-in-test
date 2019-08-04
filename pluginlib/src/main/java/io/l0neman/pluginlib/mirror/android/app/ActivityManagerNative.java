@@ -9,10 +9,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
  */
 @TargetMirrorClassName("android.app.ActivityManagerNative")
 public class ActivityManagerNative extends MirrorClass<Object> {
-
-  static {
-    mapQuiet(ActivityManagerNative.class);
-  }
+  public static final ActivityManagerNative REUSE = ActivityManagerNative.mapQuiet(ActivityManagerNative.class);
 
   public static Singleton gDefault;
 }

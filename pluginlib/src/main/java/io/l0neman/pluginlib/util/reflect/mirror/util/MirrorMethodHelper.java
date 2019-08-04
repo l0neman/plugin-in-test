@@ -11,7 +11,8 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterTypes;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterTypesOverload;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterTypesOverload2;
 
-public class MethodHelper {
+@SuppressWarnings("JavadocReference")
+public class MirrorMethodHelper {
 
   /**
    * 通过方法名称和参数类型生成签名。

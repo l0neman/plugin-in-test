@@ -11,5 +11,7 @@ import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
  */
 @TargetMirrorClassName("android.app.LoadedApk")
 public class LoadedApk extends MirrorClass<Object> {
+  public static final LoadedApk REUSE = LoadedApk.mapQuiet(LoadedApk.class);
+
   public MirrorField<Resources> mResources;
 }

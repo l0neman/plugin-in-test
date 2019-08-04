@@ -5,14 +5,11 @@ import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.Message;
 
-import io.l0neman.pluginlib.Core;
 import io.l0neman.pluginlib.client.placeholder.PlaceholderManager;
 import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.mirror.android.app.ActivityThread;
 import io.l0neman.pluginlib.support.PLLogger;
-import io.l0neman.pluginlib.support.Process;
 import io.l0neman.pluginlib.util.Reflect;
-import io.l0neman.pluginlib.util.reflect.mirror.MirrorClass;
 
 public class ActivityThreadHook {
 
@@ -83,8 +80,7 @@ public class ActivityThreadHook {
       try {
         Object sCurrentActivityThread = ActivityThread.sCurrentActivityThread.get();
 
-        ActivityThread activityThread = MirrorClass.map(sCurrentActivityThread,
-            ActivityThread.class);
+        ActivityThread activityThread = ActivityThread.REUSE.attach(sCurrentActivityThread);
 
         Handler mH = activityThread.mH.get();
 
