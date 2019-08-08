@@ -1,7 +1,10 @@
 package io.l0neman.pluginlib.util.reflect.mirror.util;
 
+import androidx.collection.ArrayMap;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import io.l0neman.pluginlib.util.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterClasses;
@@ -18,28 +21,58 @@ public class MirrorMethodHelper {
    * 通过方法名称和参数类型生成签名。
    * <p>
    * Example:
-   * testMethod(java.lang.String, int, boolean); => testMethodStinbo
-   * <p>
-   * 方法名和每种参数类型的前两个字符组合，（两个字符避免导致签名出现重复）。
+   * testMethod(java.lang.String, int, boolean); => testMethod(Ljava\lang\String;IZ)
    *
-   * @param methodName     方法名称。
+   * @param prefix         签名前缀。
    * @param parameterTypes 参数类型。
    * @return 方法签名，用于缓存 key。
    */
-  public static String getSignature(String methodName, Class<?>... parameterTypes) {
-    StringBuilder methodSignature = new StringBuilder(methodName);
+  public static String getSignature(String prefix, Class<?>... parameterTypes) {
+    StringBuilder methodSignature = new StringBuilder(prefix + "(");
 
     for (Class parameterType : parameterTypes) {
-      String sm = parameterType.getSimpleName();
-      methodSignature.append(sm.charAt(0)).append(sm.charAt(1));
+      methodSignature.append(typeSignature(parameterType));
     }
 
-    return methodSignature.toString();
+    return methodSignature.append(')').toString();
+  }
+
+  // table drive.
+  private static final Map<Class<?>, String> TYPE_SIGNATURE = new ArrayMap<Class<?>, String>() {
+    {
+      put(boolean.class, "Z");
+      put(byte.class, "B");
+      put(char.class, "C");
+      put(short.class, "S");
+      put(int.class, "I");
+      put(long.class, "J");
+      put(float.class, "F");
+      put(double.class, "D");
+    }
+  };
+
+  private static String typeSignature(Class<?> clazz) {
+    String ts = TYPE_SIGNATURE.get(clazz);
+    if (ts != null) {
+      // primitive type.
+      return ts;
+    }
+
+    if (clazz.isArray()) {
+      // array type.
+      return clazz.getName().replace('.', '\\');
+    }
+
+    // reference type.
+    ts = "L" + clazz.getName().replace('.', '\\') + ';';
+
+    return ts;
   }
 
   /**
    * @param method method.
    * @return method signature.
+   *
    * @see #getSignature(String, Class[])
    */
   public static String getSignature(Method method) {

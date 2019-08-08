@@ -377,7 +377,8 @@ public class MirrorClass<M> {
             final MirrorField mirrorField = new MirrorField(targetMirrorObject, targetMirrorField);
             field.set(mirrorObject, mirrorField);
 
-            mirrorObject.mMethodRecords.add(mirrorField);
+            // noinspection unchecked
+            mirrorObject.mFieldRecords.add(mirrorField);
           }
 
           continue; // end mirror field.
@@ -405,7 +406,8 @@ public class MirrorClass<M> {
             final MirrorMethod mirrorMethod = new MirrorMethod(targetMirrorObject, targetMirrorOverloadMethod);
             field.set(mirrorObject, mirrorMethod);
 
-            mirrorObject.mFieldRecords.add(mirrorMethod);
+            // noinspection unchecked
+            mirrorObject.mMethodRecords.add(mirrorMethod);
           }
 
           continue; // end mirror method.
@@ -477,5 +479,30 @@ public class MirrorClass<M> {
     map(targetMirrorObject, mirrorClass, mirrorObject);
 
     return mirrorObject;
+  }
+
+  /**
+   * Use ThreadLocal to ensure thread safety.
+   *
+   * @see #mapQuiet(Class)
+   */
+  public static <T extends MirrorClass> T mapQuietThreadSafe(final Class<T> mirrorClass) {
+    return new ThreadLocal<T>() {
+      @Override
+      protected T initialValue() { return mapQuiet(mirrorClass); }
+    }.get();
+  }
+
+  /**
+   * Use ThreadLocal to ensure thread safety.
+   *
+   * @see #mapQuietThreadSafe(Object, Class)
+   */
+  public static <T extends MirrorClass> T mapQuietThreadSafe(final Object targetMirrorObject,
+                                                             final Class<T> mirrorClass) {
+    return new ThreadLocal<T>() {
+      @Override
+      protected T initialValue() { return mapQuiet(targetMirrorObject, mirrorClass); }
+    }.get();
   }
 }
