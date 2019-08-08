@@ -13,7 +13,7 @@ import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.mirror.android.app.ActivityManagerNative;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.util.Objects;
-import io.l0neman.pluginlib.util.Reflect;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 
 public class ActivityManagerNativeHook {
 

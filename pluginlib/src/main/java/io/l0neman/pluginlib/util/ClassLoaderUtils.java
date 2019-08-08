@@ -9,6 +9,7 @@ import dalvik.system.DexClassLoader;
 import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.util.file.AEasyDir;
 import io.l0neman.pluginlib.util.file.EasyFile;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 
 /**
  * Created by l0neman on 2019/07/07.

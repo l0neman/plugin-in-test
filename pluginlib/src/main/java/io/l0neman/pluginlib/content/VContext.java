@@ -1,6 +1,7 @@
 package io.l0neman.pluginlib.content;
 
 import android.app.Application;
+import android.util.Log;
 
 import io.l0neman.pluginlib.util.Singleton;
 

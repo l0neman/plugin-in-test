@@ -1,4 +1,4 @@
-package io.l0neman.pluginlib.util;
+package io.l0neman.pluginlib.util.reflect;
 
 import android.os.Build;
 

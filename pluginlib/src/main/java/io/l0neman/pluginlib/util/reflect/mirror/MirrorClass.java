@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import io.l0neman.pluginlib.util.Reflect;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClass;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.TargetMirrorClassName;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;

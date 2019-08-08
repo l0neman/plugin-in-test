@@ -3,7 +3,7 @@ package io.l0neman.pluginlib.util.reflect.mirror;
 
 import java.lang.reflect.Field;
 
-import io.l0neman.pluginlib.util.Reflect;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
 import io.l0neman.pluginlib.util.reflect.mirror.util.ActionChecker;
 

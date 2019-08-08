@@ -9,7 +9,7 @@ import io.l0neman.pluginlib.client.placeholder.PlaceholderManager;
 import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.mirror.android.app.ActivityThread;
 import io.l0neman.pluginlib.support.PLLogger;
-import io.l0neman.pluginlib.util.Reflect;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 
 public class ActivityThreadHook {
 

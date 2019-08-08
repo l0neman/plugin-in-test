@@ -6,7 +6,7 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Map;
 
-import io.l0neman.pluginlib.util.Reflect;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;
 import io.l0neman.pluginlib.util.reflect.mirror.util.MirrorMethodHelper;
 

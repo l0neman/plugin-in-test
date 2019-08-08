@@ -1,19 +1,15 @@
 package io.l0neman.pluginlib;
 
-import android.accessibilityservice.AccessibilityService;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
-import android.os.Parcel;
-import android.view.accessibility.AccessibilityEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Random;
 
 import io.l0neman.pluginlib.content.VContext;
 import io.l0neman.pluginlib.hook.android.app.ActivityManagerNativeHook;
@@ -26,7 +22,7 @@ import io.l0neman.pluginlib.support.PLLogger;
 import io.l0neman.pluginlib.support.Process;
 import io.l0neman.pluginlib.util.AppUtils;
 import io.l0neman.pluginlib.util.ClassLoaderUtils;
-import io.l0neman.pluginlib.util.Reflect;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 import io.l0neman.pluginlib.util.SPUtils;
 import io.l0neman.pluginlib.util.reflect.mirror.MirrorClass;
 import io.l0neman.pluginlib.util.reflect.mirror.throwable.MirrorException;

@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import io.l0neman.pluginlib.util.Reflect;
+import io.l0neman.pluginlib.util.reflect.Reflect;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterClasses;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterClassesOverload;
 import io.l0neman.pluginlib.util.reflect.mirror.annoation.MethodParameterClassesOverload2;

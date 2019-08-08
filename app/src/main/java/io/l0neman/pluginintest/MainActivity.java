@@ -2,6 +2,7 @@ package io.l0neman.pluginintest;
 
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
