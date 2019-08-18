@@ -63,6 +63,12 @@ public class MirrorClass<M> {
   /**
    * wrapp {@link #setTargetMirrorObject(Object)}
    */
+  public <T extends MirrorClass<M>> T attach(M mTargetMirrorObject, Class<T> cast) {
+    setTargetMirrorObject(mTargetMirrorObject);
+    // noinspection unchecked
+    return (T) this;
+  }
+
   public <T extends MirrorClass<M>> T attach(M mTargetMirrorObject) {
     setTargetMirrorObject(mTargetMirrorObject);
     // noinspection unchecked
@@ -412,24 +418,6 @@ public class MirrorClass<M> {
 
           continue; // end mirror method.
         }
-
-        // for MirrorClass.
-        if (MirrorClass.class.isAssignableFrom(fieldType)) {
-
-          final Object targetMirrorField = Reflect.with(targetMirrorClass).injector()
-              .field(field.getName()).targetObject(targetMirrorObject).get();
-
-          // noinspection unchecked
-          final MirrorClass mapClass = MirrorClass.map(targetMirrorField,
-              (Class<? extends MirrorClass>) fieldType);
-
-          if (isStatic) {
-            field.set(null, mapClass);
-          } else {
-            field.set(mirrorObject, mapClass);
-          }
-
-        }
       }
     } catch (Exception e) {
       throw new MirrorException("map", e);
@@ -486,11 +474,11 @@ public class MirrorClass<M> {
    *
    * @see #mapQuiet(Class)
    */
-  public static <T extends MirrorClass> T mapQuietThreadSafe(final Class<T> mirrorClass) {
+  public static <T extends MirrorClass> ThreadLocal<T> mapQuietThreadSafe(final Class<T> mirrorClass) {
     return new ThreadLocal<T>() {
       @Override
       protected T initialValue() { return mapQuiet(mirrorClass); }
-    }.get();
+    };
   }
 
   /**
@@ -498,11 +486,11 @@ public class MirrorClass<M> {
    *
    * @see #mapQuietThreadSafe(Object, Class)
    */
-  public static <T extends MirrorClass> T mapQuietThreadSafe(final Object targetMirrorObject,
-                                                             final Class<T> mirrorClass) {
+  public static <T extends MirrorClass> ThreadLocal<T> mapQuietThreadSafe(final Object targetMirrorObject,
+                                                                          final Class<T> mirrorClass) {
     return new ThreadLocal<T>() {
       @Override
       protected T initialValue() { return mapQuiet(targetMirrorObject, mirrorClass); }
-    }.get();
+    };
   }
 }
